@@ -6,6 +6,8 @@
     <About />
     <Courses />
     <Mentors />
+    <News />
+    <Partners />
     <Footer />
   </div>
 </template>
@@ -17,8 +19,10 @@ import Banner from '../components/Banner.vue';
 import About from '../components/About.vue';
 import Courses from '../components/Courses.vue';
 import Mentors from '../components/Mentors.vue';
+import News from '../components/News.vue';
+import Partners from '../components/Partners.vue';
 
 export default {
-  components: { Navbar, Footer, Banner, About, Courses, Mentors}
+  components: { Navbar, Footer, Banner, About, Courses, Mentors, News, Partners}
 }
 </script>
