@@ -21,14 +21,11 @@
 
       <!-- Yangilik kartalari -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div v-for="(news, index) in newsList" :key="index" class="rounded-2xl overflow-hidden bg-white shadow-sm">
-          <img :src="news.image" alt="news" class="w-full h-48 object-cover">
-          <div class="p-4">
-            <p class="text-gray-400 text-sm mb-2">{{ news.date }}</p>
-            <h3 class="text-lg font-semibold mb-2">{{ news.title }}</h3>
-            <p class="text-gray-600 text-sm">{{ news.description }}</p>
-          </div>
-        </div>
+        <NewsCard
+          v-for="(news, index) in newsList"
+          :key="index"
+          :news="news"
+        />
       </div>
 
       <!-- Barcha yangiliklar tugmasi -->
@@ -46,8 +43,11 @@
 </template>
 
 <script>
+import NewsCard from '../components/NewsCard.vue'
+
 export default {
   name: 'News',
+  components: { NewsCard },
   data() {
     return {
       newsList: [
