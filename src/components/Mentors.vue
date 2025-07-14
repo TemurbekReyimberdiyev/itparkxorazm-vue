@@ -5,13 +5,16 @@
       "Bizning mentorlar — o‘z sohasining yetakchi mutaxassislari. Har bir o‘quvchiga individual yondashib, amaliy va zamonaviy bilim beradi. Ular bilan kasbga aylanuvchi ko‘nikmalarni tez va samarali o‘rganasiz."
     </p>
 
+    <!-- Carousel -->
     <Carousel
+      ref="carouselRef"
       :itemsToShow="4"
       :wrapAround="false"
       :transition="500"
       snapAlign="start"
       :breakpoints="mentorBreakpoints"
       class="w-full px-4 max-w-7xl mx-auto"
+      @slideChanged="({ currentSlide: index }) => activeSlide = index"
     >
       <Slide
         v-for="(mentor, index) in mentors"
@@ -32,29 +35,39 @@
 
       <template #addons>
         <Navigation />
-        <Pagination />
+        <!-- Default Pagination olib tashlandi -->
       </template>
     </Carousel>
 
-    <!-- Slider dots (ko‘rinish uchun) -->
+    <!-- Custom Dots -->
     <div class="flex justify-center mt-6 space-x-2">
-      <span class="w-3 h-3 bg-[#7dba28] rounded-full"></span>
-      <span class="w-3 h-3 bg-gray-300 rounded-full"></span>
-      <span class="w-3 h-3 bg-gray-300 rounded-full"></span>
+      <span
+        v-for="(mentor, index) in mentors"
+        :key="'dot-' + index"
+        @click="carouselRef.slideTo(index)"
+        :class="[
+          'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
+          activeSlide === index ? 'bg-[#7dba28]' : 'bg-gray-300'
+        ]"
+      ></span>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import MentorCard from './MentorCard.vue'
 import 'vue3-carousel/carousel.css'
-import { Carousel, Slide, Navigation, Pagination } from 'vue3-carousel'
+import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
 const mentorBreakpoints = {
   1280: { itemsToShow: 4 },
   1024: { itemsToShow: 2 },
   0:    { itemsToShow: 1 }
 }
+
+const carouselRef = ref(null)
+const activeSlide = ref(0)
 
 const mentors = [
   {
@@ -92,8 +105,9 @@ const mentors = [
     students: "400+",
     avatar: "../assets/images/alibek.jpg",
     skills: "html css js react"
-  },{
-    name: "Azamat Masharipov  ",
+  },
+  {
+    name: "Azamat Masharipov",
     field: "Frontend Dasturlash",
     education: "TATU, PDP",
     experience: "5 yil",
