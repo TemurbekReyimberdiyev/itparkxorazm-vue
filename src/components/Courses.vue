@@ -15,12 +15,13 @@
     <!-- Carousel -->
     <Carousel
       ref="carouselRef"
-      :itemsToShow="3"
+      :itemsToShow="itemsToShow"
       :wrapAround="false"
       :transition="500"
       snapAlign="start"
       :breakpoints="carouselBreakpoints"
       class="w-full"
+      @slide-end="updateActiveSlide"
     >
       <Slide
         v-for="(course, index) in courses"
@@ -39,12 +40,12 @@
     <!-- Custom Dots -->
     <div class="flex justify-center gap-2 mt-10">
       <span
-        v-for="(course, index) in courses"
+        v-for="index in dotsCount"
         :key="'dot-' + index"
-        @click="carouselRef.slideTo(index)"
-        :class="[
+        @click="() => { carouselRef.value.slideTo(index - 1); updateActiveSlide() }"
+        :class="[ 
           'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
-          activeSlide === index ? 'bg-[#7dba28]' : 'bg-gray-300'
+          activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300'
         ]"
       ></span>
     </div>
@@ -66,27 +67,51 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import CourseCard from '../components/CourseCard.vue'
-import 'vue3-carousel/carousel.css'
-import { Carousel, Slide, Navigation, useCarousel } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
+import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
+// Breakpoints
 const carouselBreakpoints = {
   1280: { itemsToShow: 3 },
   1024: { itemsToShow: 2 },
   0:    { itemsToShow: 1 }
 }
 
+// Responsive itemsToShow
+const itemsToShow = ref(3)
+
+const checkWindowWidth = () => {
+  const width = window.innerWidth
+  if (width >= 1280) itemsToShow.value = 3
+  else if (width >= 1024) itemsToShow.value = 2
+  else itemsToShow.value = 1
+}
+
+onMounted(() => {
+  checkWindowWidth()
+  window.addEventListener('resize', checkWindowWidth)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkWindowWidth)
+})
+
 // Carousel ref
 const carouselRef = ref(null)
 
-// Carousel composable orqali active slide qiymatini olish
-const { currentSlide } = useCarousel(carouselRef)
+// Active slide
 const activeSlide = ref(0)
 
-watch(currentSlide, (val) => {
-  activeSlide.value = val
-})
+const updateActiveSlide = () => {
+  activeSlide.value = carouselRef.value?.currentSlide || 0
+}
+
+// Dots count: sahifalar soni
+const dotsCount = computed(() =>
+  Math.ceil(courses.length / itemsToShow.value)
+)
 
 // Kurslar
 const courses = [

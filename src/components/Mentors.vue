@@ -8,13 +8,13 @@
     <!-- Carousel -->
     <Carousel
       ref="carouselRef"
-      :itemsToShow="4"
+      :itemsToShow="itemsToShow"
       :wrapAround="false"
       :transition="500"
       snapAlign="start"
       :breakpoints="mentorBreakpoints"
       class="w-full px-4 max-w-7xl mx-auto"
-      @slideChanged="({ currentSlide: index }) => activeSlide = index"
+      @slide-end="updateActiveSlide"
     >
       <Slide
         v-for="(mentor, index) in mentors"
@@ -35,19 +35,18 @@
 
       <template #addons>
         <Navigation />
-        <!-- Default Pagination olib tashlandi -->
       </template>
     </Carousel>
 
     <!-- Custom Dots -->
     <div class="flex justify-center mt-6 space-x-2">
       <span
-        v-for="(mentor, index) in mentors"
+        v-for="index in dotsCount"
         :key="'dot-' + index"
-        @click="carouselRef.slideTo(index)"
+        @click="() => { carouselRef.value.slideTo(index - 1); updateActiveSlide() }"
         :class="[
           'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
-          activeSlide === index ? 'bg-[#7dba28]' : 'bg-gray-300'
+          activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300'
         ]"
       ></span>
     </div>
@@ -55,20 +54,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import MentorCard from './MentorCard.vue'
-import 'vue3-carousel/carousel.css'
+import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
+// Breakpoints
 const mentorBreakpoints = {
   1280: { itemsToShow: 4 },
   1024: { itemsToShow: 2 },
   0:    { itemsToShow: 1 }
 }
 
+// Carousel ref va activeSlide
 const carouselRef = ref(null)
 const activeSlide = ref(0)
 
+// Responsive itemsToShow — ekranga qarab breakpoints’dan olish
+const itemsToShow = ref(4)
+
+const checkWindowWidth = () => {
+  const width = window.innerWidth
+  if (width >= 1280) itemsToShow.value = 4
+  else if (width >= 1024) itemsToShow.value = 2
+  else itemsToShow.value = 1
+}
+
+// On resize listener
+onMounted(() => {
+  checkWindowWidth()
+  window.addEventListener('resize', checkWindowWidth)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkWindowWidth)
+})
+
+// Slide harakat qilganda activeSlide yangilash
+const updateActiveSlide = () => {
+  activeSlide.value = carouselRef.value?.currentSlide || 0
+}
+
+// Dots soni — mentorlar sonini itemsToShow ga bo‘lib, yuqoriga yaxlitlab
+const dotsCount = computed(() =>
+  Math.ceil(mentors.length / itemsToShow.value)
+)
+
+// Mentorlar ma'lumotlari
 const mentors = [
   {
     name: "Temurbek Reyimberdiyev",
