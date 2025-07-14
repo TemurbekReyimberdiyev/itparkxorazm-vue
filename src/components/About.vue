@@ -17,9 +17,10 @@
       <div class="space-y-8">
         <!-- Rezidentlik -->
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 bg-blue-100 flex items-center justify-center rounded-full">
+          <!-- <div class="w-15 h-15 bg-blue-100 flex items-center justify-center rounded-full">
+            <img src="../assets/images/icons-people.png" alt="">
             <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 10a4 4 0 100-8 4 4 0 000 8zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          </div>
+          </div> -->
           <div>
             <h4 class="text-lg font-bold text-gray-00">Rezidentlik dasturi</h4>
             <p class="text-gray-900 leading-relaxed">
@@ -30,9 +31,10 @@
 
         <!-- Ta'lim -->
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 bg-purple-100 flex items-center justify-center rounded-full">
+          <!-- <div class="w-13 h-13 bg-purple-100 flex items-center justify-center rounded-full">
+            <img src="../assets/images/icons8-education-96.png" alt="">
             <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2L2 6l8 4 8-4-8-4zm0 6.7L3 5.11V11a1 1 0 001 1h12a1 1 0 001-1V5.11L10 8.7z"/></svg>
-          </div>
+          </div> -->
           <div>
             <h4 class="text-lg font-bold text-gray-900">Ta’lim dasturlari</h4>
             <p class="text-gray-900 leading-relaxed">
@@ -43,9 +45,10 @@
 
         <!-- Startuplar -->
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 bg-red-100 flex items-center justify-center rounded-full">
+          <!-- <div class="w-12 h-12 bg-red-100 flex items-center justify-center rounded-full">
+            <img src="../assets/images/icons8-startup-96.png" alt="">
             <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11h16v2H2v-2zm0-4h16v2H2V7zm0-4h16v2H2V3z"/></svg>
-          </div>
+          </div> -->
           <div>
             <h4 class="text-lg font-bold text-gray-900">Startuplar</h4>
             <p class="text-gray-900 leading-relaxed">
