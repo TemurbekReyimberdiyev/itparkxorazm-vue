@@ -1,5 +1,5 @@
 <template>
-  <section class="p-8 rounded-3xl shadow-lg flex flex-col lg:flex-row gap-8 items-center my-20">
+  <section id="about" class="p-8 rounded-3xl shadow-lg flex flex-col lg:flex-row gap-8 items-center my-20">
     <!-- Chap qism: rasm va text -->
     <div class="flex-1 text-center lg:text-left">
       <img src="../assets/images/today-park.png" alt="IT Park" class="mx-auto lg:mx-0 mb-6 w-auto h-auto rounded-xl" />

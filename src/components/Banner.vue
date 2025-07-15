@@ -1,5 +1,5 @@
 <template>
-  <section class="py-20">
+  <section id="banner" class="py-20">
     <div class="mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
 
       <!-- Chap qism: matn va tugma -->

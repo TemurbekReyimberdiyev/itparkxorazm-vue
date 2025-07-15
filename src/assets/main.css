@@ -9,7 +9,9 @@
   padding: 2rem;
   font-weight: normal;
 }
-
+html {
+  scroll-behavior: smooth;
+}
 /* a,
 .green {
   text-decoration: none;

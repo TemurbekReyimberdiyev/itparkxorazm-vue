@@ -2,11 +2,11 @@
   <div>
     <Navbar />
     <Banner />
-    <!-- <main class="p-6"></main> -->
     <About />
     <Courses />
     <Mentors />
     <News />
+    <ContactUs />
     <Partners />
     <Footer />
   </div>
@@ -21,8 +21,9 @@ import Courses from '../components/Courses.vue';
 import Mentors from '../components/Mentors.vue';
 import News from '../components/News.vue';
 import Partners from '../components/Partners.vue';
+import ContactUs from '../components/ContactUs.vue';
 
 export default {
-  components: { Navbar, Footer, Banner, About, Courses, Mentors, News, Partners}
+  components: { Navbar, Footer, Banner, About, Courses, Mentors, News, Partners, ContactUs}
 }
 </script>

@@ -70,7 +70,12 @@
 <script>
 import PhoneDropdown from '../components/PhoneDropdown.vue'
 import LanguageDropdown from '../components/LanguageDropdown.vue';
-
+const scrollToSection = (id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
 export default {
   name: 'Navbar',
   components: {

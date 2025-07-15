@@ -17,15 +17,20 @@
 </template>
 
 <script>
+import digitalLogo from '../assets/images/digital.png'
+import raqamliLogo from '../assets/images/raqamli.png'
+import itparkLogo from '../assets/images/itpark.png'
+import tatuLogo from '../assets/images/tatu.png'
+
 export default {
   name: 'Partners',
   data() {
     return {
       partners: [
-        { name: 'Hamkor 1', logo: '/images/partner1.png' },
-        { name: 'Hamkor 2', logo: '/images/partner2.png' },
-        { name: 'IT Park', logo: '/images/partner3.png' },
-        { name: 'Hamkor 4', logo: '/images/partner4.png' },
+        { name: 'Digital', logo: digitalLogo },
+        { name: 'Raqamli', logo: raqamliLogo },
+        { name: 'IT Park', logo: itparkLogo },
+        { name: 'TATU', logo: tatuLogo },
       ],
     }
   },
