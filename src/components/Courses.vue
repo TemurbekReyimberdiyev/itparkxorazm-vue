@@ -27,7 +27,7 @@
         v-for="(course, index) in courses"
         :key="index"
       >
-        <div class="px-2 w-full">
+        <div class="px-2 w-full" @click="openModal(course)">
           <CourseCard :course="course" />
         </div>
       </Slide>
@@ -50,7 +50,7 @@
       ></span>
     </div>
 
-    <!-- Ba’tafsil tugmasi -->
+    <!-- Ba’tafsil tugmasi
     <div class="flex justify-center mt-6">
       <button class="flex items-center gap-2 px-4 py-2 border border-[#7dba28] text-[#7dba28] rounded-full text-sm font-medium">
         Ba’tafsil
@@ -62,6 +62,35 @@
           </svg>
         </span>
       </button>
+    </div> -->
+
+    <!-- Modal (Course details) -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+      @click.self="closeModal"
+    >
+      <div
+        class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
+        :class="modalAnimation"
+      >
+        <!-- Yopish tugmasi -->
+        <button @click="closeModal" class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600">&times;</button>
+
+        <!-- Modal kontent -->
+        <img :src="selectedCourse.image" class="w-full h-60 object-cover rounded-xl mb-4" />
+        <p class="text-sm text-gray-500">{{ selectedCourse.duration }} | {{ selectedCourse.category }}</p>
+        <h2 class="text-2xl font-bold mt-2 mb-4">{{ selectedCourse.title }}</h2>
+        <p class="text-gray-700 mb-4">{{ selectedCourse.description }}</p>
+        <div class="flex items-center gap-4">
+          <img :src="selectedCourse.mentorImage" class="w-12 h-12 rounded-full object-cover" />
+          <div>
+            <p class="font-semibold">{{ selectedCourse.mentorName }}</p>
+            <p class="text-sm text-gray-500">{{ selectedCourse.experience }} tajriba</p>
+          </div>
+          <div class="ml-auto font-bold text-[#7dba28]">{{ selectedCourse.price }}</div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -72,46 +101,28 @@ import CourseCard from '../components/CourseCard.vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
-// Breakpoints
-const carouselBreakpoints = {
-  1280: { itemsToShow: 3 },
-  1024: { itemsToShow: 2 },
-  0:    { itemsToShow: 1 }
-}
-
-// Responsive itemsToShow
+// Responsive
 const itemsToShow = ref(3)
-
 const checkWindowWidth = () => {
   const width = window.innerWidth
   if (width >= 1280) itemsToShow.value = 3
   else if (width >= 1024) itemsToShow.value = 2
   else itemsToShow.value = 1
 }
-
 onMounted(() => {
   checkWindowWidth()
   window.addEventListener('resize', checkWindowWidth)
 })
-
 onUnmounted(() => {
   window.removeEventListener('resize', checkWindowWidth)
 })
 
-// Carousel ref
+// Carousel state
 const carouselRef = ref(null)
-
-// Active slide
 const activeSlide = ref(0)
-
 const updateActiveSlide = () => {
   activeSlide.value = carouselRef.value?.currentSlide || 0
 }
-
-// Dots count: sahifalar soni
-const dotsCount = computed(() =>
-  Math.ceil(courses.length / itemsToShow.value)
-)
 
 // Kurslar
 const courses = [
@@ -142,7 +153,7 @@ const courses = [
     duration: '2 oy',
     category: 'Design',
     title: 'Mobilografiya',
-    description: 'Mobilografiya asoslarini o‘rganib, telefon orqali sifatli va kreativ videolar surating.',
+    description: 'Telefon orqali sifatli va kreativ videolar surating.',
     mentorImage: '../assets/images/alibek.jpg',
     mentorName: 'Madraximov Alibek',
     experience: '1-yil',
@@ -153,11 +164,49 @@ const courses = [
     duration: '4 oy',
     category: 'IT',
     title: 'Frontend',
-    description: 'Vue, React va Tailwind asoslarini o‘rganib, web dasturchi bo‘ling.',
+    description: 'Vue, React va Tailwind o‘rganib, web dasturchi bo‘ling.',
     mentorImage: '../assets/images/mentor.jpg',
     mentorName: 'Ali Akbar',
     experience: '5-yil',
     price: '$100'
   }
 ]
+
+// Dots count
+const dotsCount = computed(() =>
+  Math.ceil(courses.length / itemsToShow.value)
+)
+
+// Modal logic
+const showModal = ref(false)
+const selectedCourse = ref({})
+const modalAnimation = ref('scale-0')
+
+const openModal = (course) => {
+  selectedCourse.value = course
+  showModal.value = true
+  setTimeout(() => {
+    modalAnimation.value = 'scale-100'
+  }, 10)
+}
+
+const closeModal = () => {
+  modalAnimation.value = 'scale-0'
+  setTimeout(() => {
+    showModal.value = false
+  }, 200)
+}
 </script>
+
+<style scoped>
+.scale-0 {
+  transform: scale(0);
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+}
+.scale-100 {
+  transform: scale(1);
+  opacity: 1;
+  transition: all 0.3s ease-in-out;
+}
+</style>

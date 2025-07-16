@@ -39,7 +39,7 @@
         class="w-full"
       >
         <Slide v-for="(news, index) in newsList" :key="index">
-          <div class="px-2 w-full">
+          <div class="px-2 w-full" @click="openModal(news)">
             <NewsCard :news="news" />
           </div>
         </Slide>
@@ -55,6 +55,30 @@
         </button>
       </div>
 
+      <!-- Modal (markazdan chiqadi, tashqariga bosilsa yopiladi) -->
+      <div
+        v-if="showModal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+        @click.self="closeModal"
+      >
+        <div
+          class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
+          :class="modalAnimation"
+        >
+          <!-- Yopish tugmasi -->
+          <button
+            @click="closeModal"
+            class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
+          >&times;</button>
+
+          <!-- Modal kontent -->
+          <img :src="selectedNews.image" class="w-full h-60 object-cover rounded-xl mb-4" />
+          <p class="text-sm text-gray-500">{{ selectedNews.date }}</p>
+          <h2 class="text-2xl font-bold mb-2">{{ selectedNews.title }}</h2>
+          <p class="text-gray-700">{{ selectedNews.description || 'Batafsil maʼlumot tez orada qo‘shiladi.' }}</p>
+        </div>
+      </div>
+
     </div>
   </section>
 </template>
@@ -67,13 +91,8 @@ import { ref } from 'vue'
 
 const newsCarousel = ref(null)
 
-const next = () => {
-  newsCarousel.value.next()
-}
-
-const prev = () => {
-  newsCarousel.value.prev()
-}
+const next = () => newsCarousel.value.next()
+const prev = () => newsCarousel.value.prev()
 
 const carouselBreakpoints = {
   1280: { itemsToShow: 3 },
@@ -86,25 +105,57 @@ const newsList = [
     image: '/images/news1.jpg',
     date: '11 Iyun 2025',
     title: 'O‘zaro manfaatli hamkorlik – AloqaBank va CDB uchrashuvi',
-    description: '',
+    description: 'AloqaBank va CDB banki o‘rtasida yangi strategik kelishuv imzolandi.',
   },
   {
     image: '/images/news2.jpg',
     date: '4 Iyun 2025',
     title: 'Yangi avlod tadbirlari: Parrandachilikni rivojlantirish yo‘li',
-    description: '',
+    description: 'Yosh tadbirkorlar uchun parrandachilik seminarlarining ilk bosqichi boshlandi.',
   },
   {
     image: '/images/news3.jpg',
     date: '3 Iyun 2025',
     title: 'AloqaBank Mahalla bankilari – moliyaviy ishonchli yordamchingiz!',
-    description: '',
+    description: 'Mahalla bankilari aholiga yaqinroq xizmat ko‘rsatish uchun joriy qilindi.',
   },
   {
     image: '/images/news4.jpg',
     date: '1 Iyun 2025',
     title: 'Yoshlar uchun yangi grant loyihasi ishga tushdi',
-    description: '',
+    description: 'Startap loyihalarni qo‘llab-quvvatlovchi grant dasturi e’lon qilindi.',
   }
 ]
+
+const showModal = ref(false)
+const selectedNews = ref({})
+const modalAnimation = ref('scale-0')
+
+const openModal = (news) => {
+  selectedNews.value = news
+  showModal.value = true
+  setTimeout(() => {
+    modalAnimation.value = 'scale-100'
+  }, 10)
+}
+
+const closeModal = () => {
+  modalAnimation.value = 'scale-0'
+  setTimeout(() => {
+    showModal.value = false
+  }, 200)
+}
 </script>
+
+<style scoped>
+.scale-0 {
+  transform: scale(0);
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+}
+.scale-100 {
+  transform: scale(1);
+  opacity: 1;
+  transition: all 0.3s ease-in-out;
+}
+</style>
