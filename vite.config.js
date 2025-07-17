@@ -15,4 +15,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    host: '0.0.0.0', // Telefon orqali kirish uchun kerak
+    port: 5173       // Istalgan port bo'lishi mumkin
+  }
 })
