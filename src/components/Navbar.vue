@@ -11,7 +11,7 @@
         <a href="/" class="font-medium text-gray-800 hover:text-[#7dba28]">Bosh sahifa</a>
         <a href="#about" class="font-medium text-gray-800 hover:text-[#7dba28]">Biz haqimizda</a>
         <a href="#courses" class="font-medium text-gray-800 hover:text-[#7dba28]">Kurslar</a>
-        <a href="#contact" class="font-medium text-gray-800 hover:text-[#7dba28]">Bog'lanish</a>
+        <a href="#contact" class="font-medium text-gray-800 hover:text-[#7dba28]">Aloqa</a>
       </div>
 
       <!-- Desktop aloqa qismi -->

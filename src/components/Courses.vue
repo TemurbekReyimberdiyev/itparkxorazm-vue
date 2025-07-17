@@ -2,14 +2,39 @@
   <section id="courses" class="p-8 max-w-7xl mx-auto">
     <h2 class="text-4xl font-bold text-[#7dba28] mb-8 text-center">O‘quv dasturlari</h2>
 
-    <!-- Filter buttons -->
-    <div class="flex flex-wrap justify-center gap-6 mb-10">
-      <button class="px-4 py-2 rounded-full border border-gray-300 text-sm hover:bg-green-50">IT & Dasturlash</button>
-      <button class="px-4 py-2 rounded-full border border-[#7dba28] bg-green-50 text-sm text-[#7dba28]">Media & Dizayn</button>
-      <button class="px-4 py-2 rounded-full border border-gray-300 text-sm hover:bg-green-50">Marketing</button>
-      <button class="px-4 py-2 rounded-full border border-gray-300 text-sm hover:bg-green-50">Xorijiy tillar</button>
-      <button class="px-4 py-2 rounded-full border border-gray-300 text-sm hover:bg-green-50">Robototexnika</button>
-      <button class="px-4 py-2 rounded-full border border-gray-300 text-sm hover:bg-green-50">IT Matematika</button>
+    <!-- Mobil versiyada dropdown menyu -->
+    <div class="relative block md:hidden text-right mb-6">
+      <button @click="toggleDropdown" class="px-4 py-2 bg-[#7dba28] text-white rounded-md shadow-md">
+        {{ selectedFilter }} <span class="ml-2">▼</span>
+      </button>
+      <div v-if="dropdownOpen" class="absolute right-0 mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
+        <ul>
+          <li
+            v-for="filter in filters"
+            :key="filter"
+            @click="selectFilter(filter)"
+            class="px-4 py-2 hover:bg-green-50 cursor-pointer"
+          >
+            {{ filter }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Desktop versiyada filter tugmalar -->
+    <div class="hidden md:flex flex-wrap justify-center gap-6 mb-10">
+      <button
+        v-for="filter in filters"
+        :key="filter"
+        class="px-4 py-2 rounded-full border text-sm"
+        :class="{
+          'border-[#7dba28] bg-green-50 text-[#7dba28]': selectedFilter === filter,
+          'border-gray-300 hover:bg-green-50': selectedFilter !== filter
+        }"
+        @click="selectFilter(filter)"
+      >
+        {{ filter }}
+      </button>
     </div>
 
     <!-- Carousel -->
@@ -24,7 +49,7 @@
       @slide-end="updateActiveSlide"
     >
       <Slide
-        v-for="(course, index) in courses"
+        v-for="(course, index) in filteredCourses"
         :key="index"
       >
         <div class="px-2 w-full" @click="openModal(course)">
@@ -50,20 +75,6 @@
       ></span>
     </div>
 
-    <!-- Ba’tafsil tugmasi
-    <div class="flex justify-center mt-6">
-      <button class="flex items-center gap-2 px-4 py-2 border border-[#7dba28] text-[#7dba28] rounded-full text-sm font-medium">
-        Ba’tafsil
-        <span class="bg-[#7dba28] text-white rounded-full p-1">
-          <svg class="w-4 h-4 transform -rotate-45" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M10.293 15.707a1 1 0 010-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-              clip-rule="evenodd" />
-          </svg>
-        </span>
-      </button>
-    </div> -->
-
     <!-- Modal (Course details) -->
     <div
       v-if="showModal"
@@ -74,10 +85,8 @@
         class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
         :class="modalAnimation"
       >
-        <!-- Yopish tugmasi -->
         <button @click="closeModal" class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600">&times;</button>
 
-        <!-- Modal kontent -->
         <img :src="selectedCourse.image" class="w-full h-60 object-cover rounded-xl mb-4" />
         <p class="text-sm text-gray-500">{{ selectedCourse.duration }} | {{ selectedCourse.category }}</p>
         <h2 class="text-2xl font-bold mt-2 mb-4">{{ selectedCourse.title }}</h2>
@@ -101,7 +110,27 @@ import CourseCard from '../components/CourseCard.vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
-// Responsive
+// Filterlar
+const filters = [
+  'IT & Dasturlash',
+  'Media & Dizayn',
+  'Marketing',
+  'Xorijiy tillar',
+  'Robototexnika',
+  'IT Matematika'
+]
+
+const selectedFilter = ref('Media & Dizayn')
+const dropdownOpen = ref(false)
+const toggleDropdown = () => {
+  dropdownOpen.value = !dropdownOpen.value
+}
+const selectFilter = (filter) => {
+  selectedFilter.value = filter
+  dropdownOpen.value = false
+}
+
+// Responsive carousel
 const itemsToShow = ref(3)
 const checkWindowWidth = () => {
   const width = window.innerWidth
@@ -124,12 +153,12 @@ const updateActiveSlide = () => {
   activeSlide.value = carouselRef.value?.currentSlide || 0
 }
 
-// Kurslar
+// Kurslar ro'yxati
 const courses = [
   {
     image: '../assets/images/graphic.png',
     duration: '3 oy',
-    category: 'Design',
+    category: 'Media & Dizayn',
     title: 'Grafik dizayn',
     description: 'Figma va grafik dizaynni o‘rganib, UI/UX sohasida ish toping.',
     mentorImage: '../assets/images/humoyun.jpg',
@@ -140,7 +169,7 @@ const courses = [
   {
     image: '../assets/images/video.jpg',
     duration: '3 oy',
-    category: 'Design',
+    category: 'Media & Dizayn',
     title: 'Video montaj',
     description: 'Video montaj asoslarini o‘rganib, kreativ videolar va kontent yarating.',
     mentorImage: '../assets/images/doston.jpg',
@@ -151,7 +180,7 @@ const courses = [
   {
     image: '../assets/images/mobilography.jpg',
     duration: '2 oy',
-    category: 'Design',
+    category: 'Media & Dizayn',
     title: 'Mobilografiya',
     description: 'Telefon orqali sifatli va kreativ videolar surating.',
     mentorImage: '../assets/images/alibek.jpg',
@@ -162,7 +191,7 @@ const courses = [
   {
     image: '../assets/images/web.png',
     duration: '4 oy',
-    category: 'IT',
+    category: 'IT & Dasturlash',
     title: 'Frontend',
     description: 'Vue, React va Tailwind o‘rganib, web dasturchi bo‘ling.',
     mentorImage: '../assets/images/mentor.jpg',
@@ -172,12 +201,17 @@ const courses = [
   }
 ]
 
-// Dots count
-const dotsCount = computed(() =>
-  Math.ceil(courses.length / itemsToShow.value)
+// Filter qilingan kurslar
+const filteredCourses = computed(() =>
+  courses.filter(course => course.category === selectedFilter.value)
 )
 
-// Modal logic
+// Dots
+const dotsCount = computed(() =>
+  Math.ceil(filteredCourses.value.length / itemsToShow.value)
+)
+
+// Modal
 const showModal = ref(false)
 const selectedCourse = ref({})
 const modalAnimation = ref('scale-0')
