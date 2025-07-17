@@ -5,9 +5,10 @@
     <About />
     <Courses />
     <Mentors />
+    <WhyChooseUs />
     <News />
     <ContactUs />
-    <Partners />
+    <!-- <Partners /> -->
     <Footer />
   </div>
 </template>
@@ -22,8 +23,9 @@ import Mentors from '../components/Mentors.vue';
 import News from '../components/News.vue';
 import Partners from '../components/Partners.vue';
 import ContactUs from '../components/ContactUs.vue';
+import WhyChooseUs from '../components/WhyChooseUs.vue';
 
 export default {
-  components: { Navbar, Footer, Banner, About, Courses, Mentors, News, Partners, ContactUs}
+  components: { Navbar, Footer, Banner, About, Courses, Mentors, News, Partners, ContactUs, WhyChooseUs}
 }
 </script>
