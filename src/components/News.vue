@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <!-- Yangiliklar carousel -->
+      <!-- Carousel -->
       <Carousel
         ref="newsCarousel"
         :itemsToShow="3"
@@ -39,23 +39,13 @@
         class="w-full"
       >
         <Slide v-for="(news, index) in newsList" :key="index">
-          <div class="px-2 w-full" @click="openModal(news)">
+          <div class="px-2 w-full cursor-pointer" @click="openModal(news)">
             <NewsCard :news="news" />
           </div>
         </Slide>
       </Carousel>
 
-      <!-- Barcha yangiliklar tugmasi
-      <div class="mt-8 flex justify-start">
-        <button class="px-5 py-3 border border-[#7dba28] text-[#7dba28] rounded-full flex items-center gap-2 hover:bg-[#7dba28] hover:text-white transition">
-          Barcha yangiliklar
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div> -->
-
-      <!-- Modal (markazdan chiqadi, tashqariga bosilsa yopiladi) -->
+      <!-- Modal -->
       <div
         v-if="showModal"
         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
@@ -65,7 +55,6 @@
           class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
           :class="modalAnimation"
         >
-          <!-- Yopish tugmasi -->
           <button
             @click="closeModal"
             class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
@@ -84,15 +73,21 @@
 </template>
 
 <script setup>
-import NewsCard from '../components/NewsCard.vue'
-import 'vue3-carousel/carousel.css'
-import { Carousel, Slide } from 'vue3-carousel'
 import { ref } from 'vue'
+import { Carousel, Slide } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
+import NewsCard from '../components/NewsCard.vue'
 
+// 🖼 Rasmlarni import qilish
+import news1 from '../assets/images/itparkxorazm.jpeg'
+import news2 from '../assets/images/itparkxorazm2.jpg'
+import news3 from '../assets/images/itparkxorazm.jpeg'
+import news4 from '../assets/images/itparkxorazm2.jpg'
+
+// Carousel boshqaruvi
 const newsCarousel = ref(null)
-
-const next = () => newsCarousel.value.next()
-const prev = () => newsCarousel.value.prev()
+const next = () => newsCarousel.value?.next()
+const prev = () => newsCarousel.value?.prev()
 
 const carouselBreakpoints = {
   1280: { itemsToShow: 3 },
@@ -100,33 +95,35 @@ const carouselBreakpoints = {
   0:    { itemsToShow: 1 }
 }
 
+// Yangiliklar ro'yxati (rasmlar import qilingan)
 const newsList = [
   {
-    image: '/images/news1.jpg',
+    image: news1,
     date: '11 Iyun 2025',
     title: 'O‘zaro manfaatli hamkorlik – AloqaBank va CDB uchrashuvi',
     description: 'AloqaBank va CDB banki o‘rtasida yangi strategik kelishuv imzolandi.',
   },
   {
-    image: '/images/news2.jpg',
+    image: news2,
     date: '4 Iyun 2025',
     title: 'Yangi avlod tadbirlari: Parrandachilikni rivojlantirish yo‘li',
     description: 'Yosh tadbirkorlar uchun parrandachilik seminarlarining ilk bosqichi boshlandi.',
   },
   {
-    image: '/images/news3.jpg',
+    image: news3,
     date: '3 Iyun 2025',
     title: 'AloqaBank Mahalla bankilari – moliyaviy ishonchli yordamchingiz!',
     description: 'Mahalla bankilari aholiga yaqinroq xizmat ko‘rsatish uchun joriy qilindi.',
   },
   {
-    image: '/images/news4.jpg',
+    image: news4,
     date: '1 Iyun 2025',
     title: 'Yoshlar uchun yangi grant loyihasi ishga tushdi',
     description: 'Startap loyihalarni qo‘llab-quvvatlovchi grant dasturi e’lon qilindi.',
   }
 ]
 
+// Modal holati
 const showModal = ref(false)
 const selectedNews = ref({})
 const modalAnimation = ref('scale-0')

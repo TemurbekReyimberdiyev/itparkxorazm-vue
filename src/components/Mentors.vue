@@ -44,10 +44,7 @@
         v-for="index in dotsCount"
         :key="'dot-' + index"
         @click="() => { carouselRef.value.slideTo(index - 1); updateActiveSlide() }"
-        :class="[
-          'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
-          activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300'
-        ]"
+        :class="[ 'w-3 h-3 rounded-full cursor-pointer transition-all duration-300', activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300' ]"
       ></span>
     </div>
   </div>
@@ -56,21 +53,75 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import MentorCard from './MentorCard.vue'
-import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
 
-// Breakpoints
+// ✅ RASMLARNI IMPORT QILISH
+import imgAlibek from '../assets/images/alibek.jpg'
+import imgIzzatbek from '../assets/images/alibek.jpg'
+import imgHumoyun from '../assets/images/alibek.jpg'
+import imgShoxruh from '../assets/images/alibek.jpg'
+import imgAzamat from '../assets/images/alibek.jpg'
+
+// ✅ MENTOR MA’LUMOTLARI
+const mentors = [
+  {
+    name: "Temurbek Reyimberdiyev",
+    field: "Kompyuter Savodxonligi",
+    education: "TATU magistr",
+    experience: "3 yil",
+    students: "500+",
+    avatar: imgAlibek,
+    skills: "Word, Excel, Windows"
+  },
+  {
+    name: "Izzatbek Mahmudjonov",
+    field: "Foundation",
+    education: "PDP, Self-study",
+    experience: "3 yil",
+    students: "300+",
+    avatar: imgIzzatbek,
+    skills: "HTML, CSS, JS"
+  },
+  {
+    name: "Humoyun Madrahimov",
+    field: "Grafik Dizayn",
+    education: "Data, Self-study",
+    experience: "3 yil",
+    students: "200+",
+    avatar: imgHumoyun,
+    skills: "Photoshop, Illustrator, Figma"
+  },
+  {
+    name: "Shoxruh Abdullayev",
+    field: "Frontend Dasturlash",
+    education: "TATU, PDP",
+    experience: "5 yil",
+    students: "400+",
+    avatar: imgShoxruh,
+    skills: "HTML, CSS, JS, React"
+  },
+  {
+    name: "Azamat Masharipov",
+    field: "Frontend Dasturlash",
+    education: "TATU, PDP",
+    experience: "5 yil",
+    students: "400+",
+    avatar: imgAzamat,
+    skills: "HTML, CSS, JS, React"
+  }
+]
+
+// ✅ RESPONSIVE UCHUN BREAKPOINTLAR
 const mentorBreakpoints = {
   1280: { itemsToShow: 4 },
   1024: { itemsToShow: 2 },
   0:    { itemsToShow: 1 }
 }
 
-// Carousel ref va activeSlide
+// ✅ QOLGAN FUNKTSIONAL QISMLAR
 const carouselRef = ref(null)
 const activeSlide = ref(0)
-
-// Responsive itemsToShow — ekranga qarab breakpoints’dan olish
 const itemsToShow = ref(4)
 
 const checkWindowWidth = () => {
@@ -80,7 +131,6 @@ const checkWindowWidth = () => {
   else itemsToShow.value = 1
 }
 
-// On resize listener
 onMounted(() => {
   checkWindowWidth()
   window.addEventListener('resize', checkWindowWidth)
@@ -90,62 +140,11 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkWindowWidth)
 })
 
-// Slide harakat qilganda activeSlide yangilash
 const updateActiveSlide = () => {
   activeSlide.value = carouselRef.value?.currentSlide || 0
 }
 
-// Dots soni — mentorlar sonini itemsToShow ga bo‘lib, yuqoriga yaxlitlab
 const dotsCount = computed(() =>
   Math.ceil(mentors.length / itemsToShow.value)
 )
-
-// Mentorlar ma'lumotlari
-const mentors = [
-  {
-    name: "Temurbek Reyimberdiyev",
-    field: "Kompyuter Savodxonligi",
-    education: "TATU magistr",
-    experience: "3 yil",
-    students: "500+",
-    avatar: "../assets/images/alibek.jpg",
-    skills: "word excel windows"
-  },
-  {
-    name: "Izzatbek Mahmudjonov",
-    field: "Foundation",
-    education: "PDP, Self-study",
-    experience: "3 yil",
-    students: "300+",
-    avatar: "../assets/images/alibek.jpg",
-    skills: "html css js"
-  },
-  {
-    name: "Humoyun Madrahimov",
-    field: "Grafik Dizayn",
-    education: "Data, Self-study",
-    experience: "3 yil",
-    students: "200+",
-    avatar: "../assets/images/alibek.jpg",
-    skills: "photoshop illustrator figma"
-  },
-  {
-    name: "Shoxruh Abdullayev",
-    field: "Frontend Dasturlash",
-    education: "TATU, PDP",
-    experience: "5 yil",
-    students: "400+",
-    avatar: "../assets/images/alibek.jpg",
-    skills: "html css js react"
-  },
-  {
-    name: "Azamat Masharipov",
-    field: "Frontend Dasturlash",
-    education: "TATU, PDP",
-    experience: "5 yil",
-    students: "400+",
-    avatar: "../assets/images/alibek.jpg",
-    skills: "html css js react"
-  }
-]
 </script>

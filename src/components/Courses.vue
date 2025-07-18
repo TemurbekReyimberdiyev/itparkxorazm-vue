@@ -2,7 +2,7 @@
   <section id="courses" class="p-8 max-w-7xl mx-auto px-10">
     <h2 class="text-4xl font-bold text-[#7dba28] mb-8 text-center">O‘quv dasturlari</h2>
 
-    <!-- Mobil versiyada dropdown menyu -->
+    <!-- Mobile dropdown -->
     <div class="relative block md:hidden text-right mb-6">
       <button @click="toggleDropdown" class="px-4 py-2 bg-[#7dba28] text-white rounded-md shadow-md">
         {{ selectedFilter }} <span class="ml-2">▼</span>
@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <!-- Desktop versiyada filter tugmalar -->
+    <!-- Desktop filter buttons -->
     <div class="hidden md:flex flex-wrap justify-center gap-6 mb-10">
       <button
         v-for="filter in filters"
@@ -67,7 +67,7 @@
       <span
         v-for="index in dotsCount"
         :key="'dot-' + index"
-        @click="() => { carouselRef.value.slideTo(index - 1); updateActiveSlide() }"
+        @click="goToSlide(index - 1)"
         :class="[ 
           'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
           activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300'
@@ -75,14 +75,14 @@
       ></span>
     </div>
 
-    <!-- Modal (Course details) -->
+    <!-- Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       @click.self="closeModal"
     >
       <div
-        class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
+        class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300 origin-center"
         :class="modalAnimation"
       >
         <button @click="closeModal" class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600">&times;</button>
@@ -110,6 +110,16 @@ import CourseCard from '../components/CourseCard.vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
+/* === Asset imports (Vite resolves to URLs) === */
+import imgGraphic from '../assets/images/graphic.png'
+import imgHumoyun from '../assets/images/graphic.png'
+import imgVideo from '../assets/images/graphic.png'
+import imgDoston from '../assets/images/graphic.png'
+import imgMobilography from '../assets/images/graphic.png'
+import imgAlibek from '../assets/images/graphic.png'
+import imgWeb from '../assets/images/graphic.png'
+import imgMentor from '../assets/images/graphic.png'
+
 // Filterlar
 const filters = [
   'IT & Dasturlash',
@@ -128,9 +138,10 @@ const toggleDropdown = () => {
 const selectFilter = (filter) => {
   selectedFilter.value = filter
   dropdownOpen.value = false
+  updateActiveSlide() // reset dots
 }
 
-// Responsive carousel
+// Responsive carousel (manual)
 const itemsToShow = ref(3)
 const checkWindowWidth = () => {
   const width = window.innerWidth
@@ -138,6 +149,7 @@ const checkWindowWidth = () => {
   else if (width >= 1024) itemsToShow.value = 2
   else itemsToShow.value = 1
 }
+
 onMounted(() => {
   checkWindowWidth()
   window.addEventListener('resize', checkWindowWidth)
@@ -146,55 +158,66 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkWindowWidth)
 })
 
+// vue3-carousel breakpoints (library will also react)
+const carouselBreakpoints = {
+  0: { itemsToShow: 1 },
+  768: { itemsToShow: 2 },
+  1280: { itemsToShow: 3 }
+}
+
 // Carousel state
 const carouselRef = ref(null)
 const activeSlide = ref(0)
 const updateActiveSlide = () => {
-  activeSlide.value = carouselRef.value?.currentSlide || 0
+  activeSlide.value = carouselRef.value?.currentSlide ?? 0
+}
+const goToSlide = (i) => {
+  carouselRef.value?.slideTo(i)
+  activeSlide.value = i
 }
 
-// Kurslar ro'yxati
+// Kurslar ro'yxati (assetlardan foydalaniladi)
 const courses = [
   {
-    image: '../assets/images/graphic.png',
+    image: imgGraphic,
     duration: '3 oy',
     category: 'Media & Dizayn',
     title: 'Grafik dizayn',
     description: 'Figma va grafik dizaynni o‘rganib, UI/UX sohasida ish toping.',
-    mentorImage: '../assets/images/humoyun.jpg',
+    mentorImage: imgHumoyun,
     mentorName: 'Madraximov Humoyun',
     experience: '3-yil',
     price: '$50'
   },
   {
-    image: '../assets/images/video.jpg',
+    image: imgVideo,
     duration: '3 oy',
     category: 'Media & Dizayn',
     title: 'Video montaj',
     description: 'Video montaj asoslarini o‘rganib, kreativ videolar va kontent yarating.',
-    mentorImage: '../assets/images/doston.jpg',
+    mentorImage: imgDoston,
     mentorName: 'Djumayev Doston',
     experience: '15-yil',
     price: '$70'
   },
   {
-    image: '../assets/images/mobilography.jpg',
+    image: imgMobilography,
     duration: '2 oy',
     category: 'Media & Dizayn',
     title: 'Mobilografiya',
     description: 'Telefon orqali sifatli va kreativ videolar surating.',
-    mentorImage: '../assets/images/alibek.jpg',
+    mentorImage: imgAlibek,
     mentorName: 'Madraximov Alibek',
     experience: '1-yil',
     price: '$80'
   },
   {
-    image: '../assets/images/web.png',
+    image: imgWeb,
     duration: '4 oy',
     category: 'IT & Dasturlash',
     title: 'Frontend',
     description: 'Vue, React va Tailwind o‘rganib, web dasturchi bo‘ling.',
-    mentorImage: '../assets/images/mentor.jpg',
+    mentorImage: imgMentor,
     mentorName: 'Ali Akbar',
     experience: '5-yil',
     price: '$100'
@@ -203,29 +226,30 @@ const courses = [
 
 // Filter qilingan kurslar
 const filteredCourses = computed(() =>
-  courses.filter(course => course.category === selectedFilter.value)
+  courses.filter((course) => course.category === selectedFilter.value)
 )
 
 // Dots
-const dotsCount = computed(() =>
-  Math.ceil(filteredCourses.value.length / itemsToShow.value)
-)
+const dotsCount = computed(() => {
+  const len = filteredCourses.value.length
+  return len ? Math.ceil(len / itemsToShow.value) : 0
+})
 
 // Modal
 const showModal = ref(false)
 const selectedCourse = ref({})
-const modalAnimation = ref('scale-0')
+const modalAnimation = ref('modal-scale-0')
 
 const openModal = (course) => {
   selectedCourse.value = course
   showModal.value = true
-  setTimeout(() => {
-    modalAnimation.value = 'scale-100'
-  }, 10)
+  requestAnimationFrame(() => {
+    modalAnimation.value = 'modal-scale-100'
+  })
 }
 
 const closeModal = () => {
-  modalAnimation.value = 'scale-0'
+  modalAnimation.value = 'modal-scale-0'
   setTimeout(() => {
     showModal.value = false
   }, 200)
@@ -233,14 +257,14 @@ const closeModal = () => {
 </script>
 
 <style scoped>
-.scale-0 {
-  transform: scale(0);
+.modal-scale-0 {
+  transform: scale(0.95);
   opacity: 0;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
-.scale-100 {
+.modal-scale-100 {
   transform: scale(1);
   opacity: 1;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 </style>
