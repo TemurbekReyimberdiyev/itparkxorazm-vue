@@ -1,6 +1,6 @@
 <template>
   <section id="contact" class="py-16 lg:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-10">
       <!-- Header -->
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-bold text-[#1F2937] mb-4">

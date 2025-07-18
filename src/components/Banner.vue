@@ -1,5 +1,5 @@
 <template>
-  <section id="banner" class="pt-20 md:pt-10 lg:pt-0 pb-5">
+  <section id="banner" class="max-w-7xl mx-auto px-10 pt-20 md:pt-10 lg:pt-0 pb-5">
     <div class="mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
       <!-- Chap qism: matn va tugma -->
       <div>

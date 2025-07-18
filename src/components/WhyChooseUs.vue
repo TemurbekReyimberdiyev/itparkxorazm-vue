@@ -1,6 +1,6 @@
 <template>
   <section class="py-16 lg:py-24 bg-gray-50">
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto px-10 max-w-7xl">
       <!-- Header -->
       <div class="text-center mb-12">
         <span class="inline-flex items-center rounded-full border border-primary text-primary px-4 py-1 text-sm font-medium mb-4">

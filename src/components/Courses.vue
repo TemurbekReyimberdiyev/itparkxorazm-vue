@@ -1,5 +1,5 @@
 <template>
-  <section id="courses" class="p-8 max-w-7xl mx-auto">
+  <section id="courses" class="p-8 max-w-7xl mx-auto px-10">
     <h2 class="text-4xl font-bold text-[#7dba28] mb-8 text-center">O‘quv dasturlari</h2>
 
     <!-- Mobil versiyada dropdown menyu -->

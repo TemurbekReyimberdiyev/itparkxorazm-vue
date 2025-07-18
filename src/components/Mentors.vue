@@ -1,7 +1,7 @@
 <template>
-  <div class="py-12 bg-white text-center">
+  <div class="max-w-7xl mx-auto px-10 py-12 bg-white text-center">
     <h2 class="text-2xl font-semibold text-[#7dba28] mb-2">Bizning Mentorlar</h2>
-    <p class="max-w-3xl mx-auto text-gray-900 mb-10 px-4">
+    <p class="text-gray-900 mb-10">
       "Bizning mentorlar — o‘z sohasining yetakchi mutaxassislari. Har bir o‘quvchiga individual yondashib, amaliy va zamonaviy bilim beradi. Ular bilan kasbga aylanuvchi ko‘nikmalarni tez va samarali o‘rganasiz."
     </p>
 

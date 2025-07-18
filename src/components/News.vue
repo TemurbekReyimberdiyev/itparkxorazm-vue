@@ -1,6 +1,6 @@
 <template>
-  <section class="py-12 bg-white">
-    <div class="container mx-auto px-4">
+  <section class="py-12 bg-white max-w-7xl mx-auto px-10">
+    <div class="container">
 
       <!-- Sarlavha va navigatsiya -->
       <div class="flex justify-between items-center mb-8">

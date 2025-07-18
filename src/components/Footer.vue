@@ -1,6 +1,6 @@
 <template>
   <footer class="bg-[#7dba28] text-white">
-    <div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="max-w-7xl mx-auto px-10 py-16">
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 
         <!-- Logo + Description + Social Icons -->
