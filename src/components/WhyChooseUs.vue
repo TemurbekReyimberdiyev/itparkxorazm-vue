@@ -22,7 +22,7 @@
           :key="index"
           class="rounded-xl bg-white text-center p-6 shadow-sm hover:shadow-md transition-shadow"
         >
-          <div class="text-3xl md:text-4xl font-bold text-green-600 mb-2">
+          <div class="text-3xl md:text-4xl font-bold text-[#7dba28] mb-2">
             {{ stat.number }}
           </div>
           <div class="text-sm text-gray-600">{{ stat.label }}</div>
@@ -48,7 +48,7 @@
 
       <!-- Call to Action -->
       <div class="text-center mt-16">
-        <div class="bg-green-600 rounded-2xl p-8 text-white">
+        <div class="bg-[#7dba28] rounded-2xl p-8 text-white">
           <h3 class="text-2xl font-bold mb-4">Hoziroq boshlang!</h3>
           <p class="text-lg mb-6 text-white/90">
             Bepul konsultatsiya va demo darslarga yoziling

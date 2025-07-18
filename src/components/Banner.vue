@@ -1,5 +1,5 @@
 <template>
-  <section id="banner" class="py-20">
+  <section id="banner" class="pt-20 md:pt-10 lg:pt-0 pb-5">
     <div class="mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
 
       <!-- Chap qism: matn va tugma -->
@@ -20,17 +20,19 @@
         </a>
       </div>
 
-      <!-- O'ng qism: statistika rasmlari -->
-      <div class="grid grid-cols-2 gap-4">
-        <img src="/src/assets/images/location.png" alt="Statistika 1" class="rounded-xl shadow" />
-        <img src="/src/assets/images/location.png" alt="Statistika 2" class="rounded-xl shadow" />
-        <img src="/src/assets/images/location.png" alt="Statistika 3" class="rounded-xl shadow" />
-        <img src="/src/assets/images/location.png" alt="Statistika 4" class="rounded-xl shadow" />
+      <!-- O'ng qism: bitta rasm -->
+      <div>
+        <img
+          src="../assets/images/itparkxorazm.jpeg"
+          alt="IT Park Xorazm"
+          class="rounded-xl shadow w-full h-auto object-cover"
+        />
       </div>
 
     </div>
   </section>
 </template>
+
 
 <script>
 export default {

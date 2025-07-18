@@ -45,7 +45,7 @@
         </Slide>
       </Carousel>
 
-      <!-- Barcha yangiliklar tugmasi -->
+      <!-- Barcha yangiliklar tugmasi
       <div class="mt-8 flex justify-start">
         <button class="px-5 py-3 border border-[#7dba28] text-[#7dba28] rounded-full flex items-center gap-2 hover:bg-[#7dba28] hover:text-white transition">
           Barcha yangiliklar
@@ -53,7 +53,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
-      </div>
+      </div> -->
 
       <!-- Modal (markazdan chiqadi, tashqariga bosilsa yopiladi) -->
       <div
