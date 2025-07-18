@@ -63,7 +63,7 @@
           <a href="/" @click="closeMenu">Bosh sahifa</a>
           <a href="#about" @click="closeMenu">Biz haqimizda</a>
           <a href="#courses" @click="closeMenu">Kurslar</a>
-          <a href="#contact" @click="closeMenu">Bog'lanish</a>
+          <a href="#contact" @click="closeMenu">Aloqa</a>
         </div>
       </div>
     </transition>
