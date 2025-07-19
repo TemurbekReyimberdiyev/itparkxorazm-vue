@@ -1,5 +1,5 @@
 <template>
-  <section class="py-12 bg-white max-w-7xl mx-auto px-10">
+  <section id="news" class="py-12 bg-white max-w-7xl mx-auto px-10">
     <div class="container">
 
       <!-- Sarlavha va navigatsiya -->

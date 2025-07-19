@@ -13,13 +13,13 @@
             Biz zamonaviy IT ta'limni Xorazmda rivojlantiramiz. O'quvchilarimizga sifatli va amaliy bilim beramiz.
           </p>
           <div class="flex space-x-4">
-            <a href="#" class="p-2 rounded-full bg-white/10 hover:text-pink-400 transition-colors" aria-label="Instagram">
+            <a href="https://www.instagram.com/itpark_xorazm_/" target="_blank" class="p-2 rounded-full bg-white/10 hover:text-pink-400 transition-colors" aria-label="Instagram">
               <img src="@/assets/images/instagram.svg" alt="Instagram" class="w-5 h-5" />
             </a>
-            <a href="#" class="p-2 rounded-full bg-white/10 hover:text-blue-400 transition-colors" aria-label="Telegram">
+            <a href="https://t.me/xorazm_it_park" target="_blank" class="p-2 rounded-full bg-white/10 hover:text-blue-400 transition-colors" aria-label="Telegram">
               <img src="@/assets/images/telegram.svg" alt="Telegram" class="w-5 h-5" />
             </a>
-            <a href="#" class="p-2 rounded-full bg-white/10 hover:text-red-500 transition-colors" aria-label="YouTube">
+            <a href="https://youtube.com/@itpark_xorazm_" target="_blank" class="p-2 rounded-full bg-white/10 hover:text-red-500 transition-colors" aria-label="YouTube">
               <img src="@/assets/images/youtube.svg" alt="YouTube" class="w-5 h-5" />
             </a>
           </div>
@@ -29,9 +29,9 @@
         <div class="space-y-4">
           <h3 class="text-lg font-semibold">Tezkor havolalar</h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Biz haqimizda</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Kurslar</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Yangiliklar</a></li>
+            <li><a href="#about" class="text-white/80 hover:text-white transition-colors">Biz haqimizda</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">Kurslar</a></li>
+            <li><a href="#news" class="text-white/80 hover:text-white transition-colors">Yangiliklar</a></li>
           </ul>
         </div>
 
