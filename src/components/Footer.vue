@@ -39,12 +39,12 @@
         <div class="space-y-4">
           <h3 class="text-lg font-semibold">Kurslar</h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Frontend Development</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Backend Development</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Mobile Development</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">Data Science</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">UI/UX Design</a></li>
-            <li><a href="#" class="text-white/80 hover:text-white transition-colors">DevOps Engineering</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">Frontend Development</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">Backend Development</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">Mobile Development</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">Data Science</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">UI/UX Design</a></li>
+            <li><a href="#courses" class="text-white/80 hover:text-white transition-colors">DevOps Engineering</a></li>
           </ul>
         </div>
 

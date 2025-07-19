@@ -108,7 +108,7 @@ const mentors = [
     experience: "5 yil",
     students: "400+",
     avatar: imgAzamat,
-    skills: "html css js react"
+    skills: "html css js vue"
   }
 ]
 
