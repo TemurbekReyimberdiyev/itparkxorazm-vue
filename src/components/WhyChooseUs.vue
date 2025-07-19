@@ -1,6 +1,6 @@
 <template>
   <section class="py-16 lg:py-24 bg-gray-50">
-    <div class="container mx-auto px-10 max-w-7xl">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
       <!-- Header -->
       <div class="text-center mb-12">
         <span class="inline-flex items-center rounded-full border border-primary text-primary px-4 py-1 text-sm font-medium mb-4">
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Benefits Grid -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div
           v-for="(benefit, index) in benefits"
           :key="index"
@@ -71,6 +71,7 @@
   </section>
 </template>
 
+
 <script setup>
 import {
   GraduationCap,
@@ -95,7 +96,7 @@ const benefits = [
     icon: Briefcase,
     title: 'Kafolatlangan ishga joylashish',
     description:
-      '95% bitiruvchilar kurs tugagach 3 oy ichida ishga joylashadi',
+      '90% bitiruvchilar kurs tugagach 3 oy ichida ishga joylashadi',
     color: 'text-green-600'
   },
   {
@@ -131,15 +132,15 @@ const benefits = [
   {
     icon: Shield,
     title: 'Ishonchlilik',
-    description: '5 yillik tajriba va ming dan ortiq mamnun talabalar',
+    description: '3 yillik tajriba va ming dan ortiq mamnun talabalar',
     color: 'text-cyan-600'
   }
 ]
 
 const stats = [
-  { number: '500+', label: 'Muvaffaqiyatli bitiruvchilar' },
-  { number: '95%', label: 'Ishga joylashish koeffitsienti' },
-  { number: '50+', label: 'Hamkor kompaniyalar' },
-  { number: '5', label: 'Yillik tajriba' }
+  { number: '1500+', label: 'Muvaffaqiyatli bitiruvchilar' },
+  { number: '90%', label: 'Ishga joylashish koeffitsienti' },
+  { number: '20+', label: 'Hamkor kompaniyalar' },
+  { number: '3', label: 'Yillik tajriba' }
 ]
 </script>

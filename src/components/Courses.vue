@@ -1,13 +1,21 @@
 <template>
-  <section id="courses" class="p-8 max-w-7xl mx-auto px-10">
-    <h2 class="text-4xl font-bold text-[#7dba28] mb-8 text-center">O‘quv dasturlari</h2>
+  <section id="courses" class="max-w-7xl mx-auto px-4 sm:px-10">
+    <!-- Sarlavha -->
+    <h2 class="text-2xl sm:text-4xl font-bold text-[#7dba28] mb-8 text-center">O‘quv dasturlari</h2>
 
     <!-- Mobile dropdown -->
-    <div class="relative block md:hidden text-right mb-6">
-      <button @click="toggleDropdown" class="px-4 py-2 bg-[#7dba28] text-white rounded-md shadow-md">
-        {{ selectedFilter }} <span class="ml-2">▼</span>
+    <div ref="dropdownRef" class="relative block md:hidden text-right mb-6">
+      <button
+        @click="toggleDropdown"
+        class="px-4 py-2 bg-[#7dba28] text-white rounded-md shadow-md flex items-center justify-between w-full"
+      >
+        <span>{{ selectedFilter }}</span>
+        <ChevronDownIcon class="w-5 h-5 ml-2" />
       </button>
-      <div v-if="dropdownOpen" class="absolute right-0 mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
+      <div
+        v-if="dropdownOpen"
+        class="absolute right-0 mt-2 w-56 bg-white border rounded-md shadow-lg z-50"
+      >
         <ul>
           <li
             v-for="filter in filters"
@@ -48,10 +56,7 @@
       class="w-full"
       @slide-end="updateActiveSlide"
     >
-      <Slide
-        v-for="(course, index) in filteredCourses"
-        :key="index"
-      >
+      <Slide v-for="(course, index) in filteredCourses" :key="index">
         <div class="px-2 w-full" @click="openModal(course)">
           <CourseCard :course="course" />
         </div>
@@ -62,15 +67,15 @@
       </template>
     </Carousel>
 
-    <!-- Custom Dots -->
+    <!-- Custom dots -->
     <div class="flex justify-center gap-2 mt-10">
       <span
         v-for="index in dotsCount"
         :key="'dot-' + index"
         @click="goToSlide(index - 1)"
-        :class="[ 
+        :class="[
           'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
-          activeSlide === (index - 1) ? 'bg-[#7dba28]' : 'bg-gray-300'
+          activeSlide === index - 1 ? 'bg-[#7dba28]' : 'bg-gray-300'
         ]"
       ></span>
     </div>
@@ -85,7 +90,12 @@
         class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300 origin-center"
         :class="modalAnimation"
       >
-        <button @click="closeModal" class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600">&times;</button>
+        <button
+          @click="closeModal"
+          class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
+        >
+          &times;
+        </button>
 
         <img :src="selectedCourse.image" class="w-full h-60 object-cover rounded-xl mb-4" />
         <p class="text-sm text-gray-500">{{ selectedCourse.duration }} | {{ selectedCourse.category }}</p>
@@ -106,11 +116,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import CourseCard from '../components/CourseCard.vue'
-import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
+import CourseCard from '../components/CourseCard.vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
+import 'vue3-carousel/dist/carousel.css'
 
-/* === Asset imports (Vite resolves to URLs) === */
+// Assetlar
 import imgGraphic from '../assets/images/graphic.png'
 import imgHumoyun from '../assets/images/graphic.png'
 import imgVideo from '../assets/images/graphic.png'
@@ -120,7 +131,6 @@ import imgAlibek from '../assets/images/graphic.png'
 import imgWeb from '../assets/images/graphic.png'
 import imgMentor from '../assets/images/graphic.png'
 
-// Filterlar
 const filters = [
   'IT & Dasturlash',
   'Media & Dizayn',
@@ -132,16 +142,24 @@ const filters = [
 
 const selectedFilter = ref('Media & Dizayn')
 const dropdownOpen = ref(false)
-const toggleDropdown = () => {
-  dropdownOpen.value = !dropdownOpen.value
-}
+const dropdownRef = ref(null)
+
+const toggleDropdown = () => (dropdownOpen.value = !dropdownOpen.value)
 const selectFilter = (filter) => {
   selectedFilter.value = filter
   dropdownOpen.value = false
-  updateActiveSlide() // reset dots
+  updateActiveSlide()
 }
 
-// Responsive carousel (manual)
+// Tashqariga bosilganda dropdownni yopish
+const handleClickOutside = (e) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+    dropdownOpen.value = false
+  }
+}
+onMounted(() => window.addEventListener('click', handleClickOutside))
+onUnmounted(() => window.removeEventListener('click', handleClickOutside))
+
 const itemsToShow = ref(3)
 const checkWindowWidth = () => {
   const width = window.innerWidth
@@ -149,7 +167,6 @@ const checkWindowWidth = () => {
   else if (width >= 1024) itemsToShow.value = 2
   else itemsToShow.value = 1
 }
-
 onMounted(() => {
   checkWindowWidth()
   window.addEventListener('resize', checkWindowWidth)
@@ -158,14 +175,12 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkWindowWidth)
 })
 
-// vue3-carousel breakpoints (library will also react)
 const carouselBreakpoints = {
   0: { itemsToShow: 1 },
   768: { itemsToShow: 2 },
   1280: { itemsToShow: 3 }
 }
 
-// Carousel state
 const carouselRef = ref(null)
 const activeSlide = ref(0)
 const updateActiveSlide = () => {
@@ -176,7 +191,6 @@ const goToSlide = (i) => {
   activeSlide.value = i
 }
 
-// Kurslar ro'yxati (assetlardan foydalaniladi)
 const courses = [
   {
     image: imgGraphic,
@@ -224,18 +238,15 @@ const courses = [
   }
 ]
 
-// Filter qilingan kurslar
 const filteredCourses = computed(() =>
   courses.filter((course) => course.category === selectedFilter.value)
 )
 
-// Dots
 const dotsCount = computed(() => {
   const len = filteredCourses.value.length
   return len ? Math.ceil(len / itemsToShow.value) : 0
 })
 
-// Modal
 const showModal = ref(false)
 const selectedCourse = ref({})
 const modalAnimation = ref('modal-scale-0')
@@ -247,7 +258,6 @@ const openModal = (course) => {
     modalAnimation.value = 'modal-scale-100'
   })
 }
-
 const closeModal = () => {
   modalAnimation.value = 'modal-scale-0'
   setTimeout(() => {
