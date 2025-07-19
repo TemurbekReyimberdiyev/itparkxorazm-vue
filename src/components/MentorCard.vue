@@ -10,7 +10,7 @@
       <img
         v-for="icon in skillsArray"
         :key="icon"
-        :src="`/icons/${icon}.svg`"
+        :src="getIconPath(icon)"
         :alt="icon"
         class="w-6 h-6"
       />
@@ -19,7 +19,8 @@
 </template>
 
 <script setup>
-const { name, field, education, experience, students, avatar, skills } = defineProps({
+import { computed } from 'vue'
+const props = defineProps({
   name: String,
   field: String,
   education: String,
@@ -29,5 +30,11 @@ const { name, field, education, experience, students, avatar, skills } = defineP
   skills: String
 })
 
-const skillsArray = skills.split(' ')
+// skill iconlarini stringdan massivga aylantiramiz
+const skillsArray = computed(() => props.skills.split(' '))
+
+// dinamik import orqali rasm manzilini berish
+const getIconPath = (icon) => {
+  return new URL(`./icons/${icon}.svg`, import.meta.url).href
+}
 </script>

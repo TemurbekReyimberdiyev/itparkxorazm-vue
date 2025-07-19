@@ -72,7 +72,7 @@ const mentors = [
     experience: "3 yil",
     students: "500+",
     avatar: imgAlibek,
-    skills: "Word, Excel, Windows"
+    skills: "word excel windows"
   },
   {
     name: "Izzatbek Mahmudjonov",
@@ -81,7 +81,7 @@ const mentors = [
     experience: "3 yil",
     students: "300+",
     avatar: imgIzzatbek,
-    skills: "HTML, CSS, JS"
+    skills: "html css js"
   },
   {
     name: "Humoyun Madrahimov",
@@ -90,7 +90,7 @@ const mentors = [
     experience: "3 yil",
     students: "200+",
     avatar: imgHumoyun,
-    skills: "Photoshop, Illustrator, Figma"
+    skills: "photoshop illustrator figma"
   },
   {
     name: "Shoxruh Abdullayev",
@@ -99,7 +99,7 @@ const mentors = [
     experience: "5 yil",
     students: "400+",
     avatar: imgShoxruh,
-    skills: "HTML, CSS, JS, React"
+    skills: "html css js react"
   },
   {
     name: "Azamat Masharipov",
@@ -108,7 +108,7 @@ const mentors = [
     experience: "5 yil",
     students: "400+",
     avatar: imgAzamat,
-    skills: "HTML, CSS, JS, React"
+    skills: "html css js react"
   }
 ]
 
