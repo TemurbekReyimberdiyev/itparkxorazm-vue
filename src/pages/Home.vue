@@ -1,12 +1,11 @@
 <template>
-  <div class="text-center">
-    <h1 class="text-4xl font-bold text-blue-700">Assalomu alaykum!</h1>
-    <p class="mt-4 text-gray-600">Bu bizning Vue 3 + Vite + Tailwind loyihamiz!</p>
-  </div>
+  <MainLayout />
 </template>
 
 <script>
+import MainLayout from '../layouts/MainLayout.vue'
+
 export default {
-  name: 'Home'
+  components: { MainLayout }
 }
 </script>
