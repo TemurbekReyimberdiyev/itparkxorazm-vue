@@ -1,5 +1,9 @@
-// src/admin/router.js
 export default [
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: () => import('@/admin/views/Login.vue'), // login sahifangiz
+  },
   {
     path: '/admin',
     component: () => import('@/admin/layouts/AdminLayout.vue'),

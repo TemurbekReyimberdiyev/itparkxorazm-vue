@@ -1,10 +1,10 @@
 <template>
   <div class="flex">
     <!-- Sidebar -->
-    <AdminSidebar :currentPage="currentPage" @update:page="currentPage = $event" />
+    <AdminSidebar :currentPage="currentPage" @update:page="currentPage = $event" @logout="handleLogout" />
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 overflow-y-auto">
+    <main class="flex-1 p-6 overflow-y-auto ml-64">
       <Dashboard v-if="currentPage === 'dashboard'" />
       <Mentors v-else-if="currentPage === 'mentors'" />
       <Categories v-else-if="currentPage === 'categories'" />
@@ -26,7 +26,17 @@ import Courses from '@/admin/views/Courses.vue';
 import Skills from '@/admin/views/Skills.vue';
 import Requests from '@/admin/views/Requests.vue';
 import News from '@/admin/views/News.vue';
+import { useAuthStore } from '@/admin/stores/auth' // ✅ Bu qator kerak
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
+function handleLogout() {
+  const auth = useAuthStore()
+  auth.logout()
+  console.log('Auth state:', auth.isAuthenticated) // false bo'lishi kerak
+  router.push('/admin/login')
+}
 const currentPage = ref('dashboard');
 </script>
 
