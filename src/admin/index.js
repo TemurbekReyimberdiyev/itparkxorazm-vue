@@ -2,12 +2,12 @@
 export default [
   {
     path: '/admin',
-    component: () => import('./layouts/AdminLayout.vue'),
+    component: () => import('@/admin/layouts/AdminLayout.vue'),
     children: [
       {
         path: '',
         name: 'AdminDashboard',
-        component: () => import('./views/Dashboard.vue'),
+        component: () => import('@/admin/views/Dashboard.vue'),
       },
       // boshqa admin sahifalar bu yerda bo'ladi
     ],

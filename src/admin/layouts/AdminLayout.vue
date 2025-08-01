@@ -20,12 +20,12 @@
 import { ref } from 'vue';
 import AdminSidebar from '@/admin/views/AdminSidebar.vue';
 import Dashboard from '@/admin/views/Dashboard.vue';
-// import Mentors from '@/admin/views/Mentors.vue';
-// import Categories from '@/admin/views/Categories.vue';
-// import Courses from '@/admin/views/Courses.vue';
-// import Skills from '@/admin/views/Skills.vue';
-// import Requests from '@/admin/views/Requests.vue';
-// import News from '@/admin/views/News.vue';
+import Mentors from '@/admin/views/Mentors.vue';
+import Categories from '@/admin/views/Categories.vue';
+import Courses from '@/admin/views/Courses.vue';
+import Skills from '@/admin/views/Skills.vue';
+import Requests from '@/admin/views/Requests.vue';
+import News from '@/admin/views/News.vue';
 
 const currentPage = ref('dashboard');
 </script>
