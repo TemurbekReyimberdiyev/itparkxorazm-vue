@@ -140,7 +140,7 @@
               <TableCell>{{ formatPrice(course.cost) }}</TableCell>
               <TableCell>
                 <div class="flex gap-2">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" @click="handleView(course)">
                     <Eye class="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="outline" @click="handleEdit(course)">
@@ -156,6 +156,29 @@
         </Table>
       </CardContent>
     </Card>
+    <Dialog :open="isViewDialogOpen" @update:open="val => isViewDialogOpen = val">
+  <DialogContent class="w-full max-w-2xl">
+    <DialogHeader>
+      <DialogTitle>Kurs Tafsilotlari</DialogTitle>
+    </DialogHeader>
+    <div v-if="viewingCourse" class="space-y-4">
+      <img :src="viewingCourse.image_url" class="w-full h-64 object-cover rounded-lg" alt="Kurs rasmi" />
+      <div>
+        <h3 class="text-xl font-semibold">{{ viewingCourse.name }}</h3>
+        <p class="text-muted-foreground">{{ viewingCourse.heading }}</p>
+        <p class="mt-2">{{ viewingCourse.description }}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+        <p><strong>Kategoriya:</strong> {{ getCategoryName(viewingCourse.category_id) }}</p>
+        <p><strong>Davomiyligi:</strong> {{ viewingCourse.duration_month }} oy</p>
+        <p><strong>Narxi:</strong> {{ formatPrice(viewingCourse.cost) }}</p>
+      </div>
+      <div class="flex justify-end">
+        <Button variant="outline" @click="isViewDialogOpen = false">Yopish</Button>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
   </div>
 </template>
 
@@ -179,7 +202,13 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/a
 
 import { courses as initialCourses, categories } from '@/admin/data/mockData';
 import type { Course } from '@/admin/types/database';
+const isViewDialogOpen = ref(false);
+const viewingCourse = ref<Course | null>(null);
 
+const handleView = (course: Course) => {
+  viewingCourse.value = course;
+  isViewDialogOpen.value = true;
+};
 const coursesData = ref<Course[]>([...initialCourses]);
 const isDialogOpen = ref(false);
 const editingCourse = ref<Course | null>(null);

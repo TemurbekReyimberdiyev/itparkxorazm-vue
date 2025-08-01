@@ -130,7 +130,7 @@ const handleSubmit = async (e) => {
 
       <div class="text-center mt-6">
         <p class="text-xs text-muted-foreground">
-          © 2024 IT O'quv Markazi. Barcha huquqlar himoyalangan.
+          © 2025 IT O'quv Markazi. Barcha huquqlar himoyalangan.
         </p>
       </div>
     </div>

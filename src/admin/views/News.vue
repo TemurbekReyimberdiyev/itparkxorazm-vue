@@ -7,45 +7,47 @@
         <p class="text-muted-foreground">O'quv markazi yangiliklarini boshqaring</p>
       </div>
       <Dialog :open="isDialogOpen" @update:open="val => isDialogOpen = val">
-        <DialogTrigger as="div">
+        <!-- <DialogTrigger as="div"> -->
           <Button @click="openNewDialog">
             <Plus class="w-4 h-4 mr-2" /> Yangi Xabar
           </Button>
-        </DialogTrigger>
-        <DialogContent class="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{{ editingNews ? 'Xabarni Tahrirlash' : 'Yangi Xabar Qo\'shish' }}</DialogTitle>
-          </DialogHeader>
-          <form @submit.prevent="handleSubmit" class="space-y-4">
-            <div class="space-y-2">
-              <label>Sarlavha</label>
-              <Input v-model="formData.heading" placeholder="Xabar sarlavhasini kiriting" required />
-            </div>
-            <div class="space-y-2">
-              <label>Matn</label>
-              <Textarea v-model="formData.description" rows="5" placeholder="Xabar matnini kiriting" required />
-            </div>
-            <div class="space-y-2">
-              <label>Rasm URL</label>
-              <Input v-model="formData.image_url" placeholder="https://example.com/image.jpg" />
-              <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p>
-            </div>
-            <div v-if="formData.heading || formData.description" class="space-y-2">
-              <label>Preview</label>
-              <div class="border rounded-lg p-4 space-y-3">
-                <img :src="formData.image_url || defaultImage" alt="Preview" class="w-full h-48 rounded object-cover" />
-                <div>
-                  <h4>{{ formData.heading || 'Sarlavha' }}</h4>
-                  <p class="text-sm text-muted-foreground mt-2">{{ previewDescription }}</p>
-                </div>
-              </div>
-            </div>
-            <div class="flex justify-end gap-2">
-              <Button variant="outline" type="button" @click="isDialogOpen = false">Bekor qilish</Button>
-              <Button type="submit">{{ editingNews ? 'Saqlash' : 'Qo\'shish' }}</Button>
-            </div>
-          </form>
-        </DialogContent>
+        <!-- </DialogTrigger> -->
+        <DialogContent class="w-full max-w-2xl">
+  <div class="max-h-[80vh] overflow-y-auto space-y-4 px-1">
+    <DialogHeader>
+      <DialogTitle>{{ editingNews ? 'Xabarni Tahrirlash' : 'Yangi Xabar Qo\'shish' }}</DialogTitle>
+    </DialogHeader>
+    <form @submit.prevent="handleSubmit" class="space-y-4">
+      <div class="space-y-2">
+        <label>Sarlavha</label>
+        <Input v-model="formData.heading" placeholder="Xabar sarlavhasini kiriting" required />
+      </div>
+      <div class="space-y-2">
+        <label>Matn</label>
+        <Textarea v-model="formData.description" rows="5" placeholder="Xabar matnini kiriting" required />
+      </div>
+      <div class="space-y-2">
+        <label>Rasm URL</label>
+        <Input v-model="formData.image_url" placeholder="https://example.com/image.jpg" />
+        <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p>
+      </div>
+      <div v-if="formData.heading || formData.description" class="space-y-2">
+        <label>Preview</label>
+        <div class="border rounded-lg p-4 space-y-3">
+          <img :src="formData.image_url || defaultImage" alt="Preview" class="w-full max-h-48 rounded object-cover" />
+          <div>
+            <h4>{{ formData.heading || 'Sarlavha' }}</h4>
+            <p class="text-sm text-muted-foreground mt-2">{{ previewDescription }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <Button variant="outline" type="button" @click="isDialogOpen = false">Bekor qilish</Button>
+        <Button type="submit">{{ editingNews ? 'Saqlash' : 'Qo\'shish' }}</Button>
+      </div>
+    </form>
+  </div>
+</DialogContent>
       </Dialog>
     </div>
 
