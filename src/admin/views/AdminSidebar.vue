@@ -1,10 +1,13 @@
+<!-- src/admin/views/AdminSidebar.vue -->
 <template>
-  <aside class="fixed top-0 left-0 w-64 h-screen bg-white border-r border-gray-200 p-4 flex flex-col justify-between z-40">
-
+  <aside
+    class="fixed top-0 left-0 w-64 h-screen bg-white border-r border-gray-200 p-4 flex flex-col justify-between z-40 transition-transform transform"
+    :class="[isOpen ? 'translate-x-0' : '-translate-x-full', 'md:translate-x-0']"
+  >
     <div>
       <!-- Logo yoki Sarlavha -->
       <div class="mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">IT Park O'quv Markazi</h2>
+        <h2 class="text-lg font-semibold text-gray-700">IT O'quv Markazi</h2>
       </div>
 
       <!-- Menu -->
@@ -42,12 +45,7 @@
           <p class="text-xs text-muted-foreground">Administrator</p>
         </div>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        class="w-full"
-        @click="handleLogout"
-      >
+      <Button variant="outline" size="sm" class="w-full" @click="handleLogout">
         <LogOut class="w-4 h-4 mr-2" />
         Chiqish
       </Button>
@@ -73,7 +71,8 @@ import { Separator } from '@/admin/components/ui/separator'
 
 const props = defineProps({
   currentPage: String,
-  username: String
+  username: String,
+  isOpen: Boolean
 })
 
 const emit = defineEmits(['update:page', 'logout'])
@@ -92,9 +91,3 @@ const menuItems = [
   { id: 'news', label: 'Yangiliklar', icon: Newspaper }
 ]
 </script>
-
-<style scoped>
-.text-primary {
-  color: #2563eb;
-}
-</style>

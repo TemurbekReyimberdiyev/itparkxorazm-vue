@@ -60,7 +60,7 @@ export const mentors: Mentor[] = [
     education: "Samarqand Davlat Universiteti",
     experience_years: 7,
     students: 95,
-    image_url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop"
+    image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop"
   },
   {
     id: 3,
