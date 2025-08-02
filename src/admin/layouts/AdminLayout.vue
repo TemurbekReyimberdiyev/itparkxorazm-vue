@@ -8,18 +8,27 @@
     ></div>
 
     <!-- Sidebar -->
-    <AdminSidebar
-      :currentPage="currentPage"
-      :username="username"
-      :isOpen="isSidebarOpen"
-      @update:page="currentPage = $event"
-      @logout="handleLogout"
-    />
+   <AdminSidebar
+  :currentPage="currentPage"
+  :username="username"
+  :isOpen="isSidebarOpen"
+  :isMobile="true"
+  @update:page="handlePageChange"
+  @close-sidebar="isSidebarOpen = false"
+  @logout="handleLogout"
+/>
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden ml-0 md:ml-64">
       <!-- Mobile header -->
-      <Header @toggle-sidebar="toggleSidebar" @logout="handleLogout" />
+      <Header
+        :currentPage="currentPage"
+        :pageTitle="getPageTitle(currentPage)"
+        :username="username"
+        @toggle-sidebar="toggleSidebar"
+        @logout="handleLogout"
+        @page-change="handlePageChange"
+      />
 
       <!-- Sahifa kontenti -->
       <main class="flex-1 p-4 overflow-y-auto">
@@ -35,8 +44,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/admin/stores/auth'
+
+// Komponentlar
 import AdminSidebar from '@/admin/views/AdminSidebar.vue'
 import Header from '@/admin/views/Header.vue'
 import Dashboard from '@/admin/views/Dashboard.vue'
@@ -46,21 +59,44 @@ import Courses from '@/admin/views/Courses.vue'
 import Skills from '@/admin/views/Skills.vue'
 import Requests from '@/admin/views/Requests.vue'
 import News from '@/admin/views/News.vue'
-import { useAuthStore } from '@/admin/stores/auth'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+// Auth va router
 const auth = useAuthStore()
+const router = useRouter()
+
+// State
 const currentPage = ref('dashboard')
 const isSidebarOpen = ref(false)
 const username = 'Admin'
 
+// Sahifani o‘zgartirish
+function handlePageChange(page: string) {
+  currentPage.value = page
+  isSidebarOpen.value = false // mobilda menyuni yopish
+}
+
+// Logout
 function handleLogout() {
   auth.logout()
   router.push('/admin/login')
 }
 
+// Sidebar toggle (mobil)
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
+}
+
+// Sahifa sarlavhalari
+function getPageTitle(page: string): string {
+  const titles: Record<string, string> = {
+    dashboard: 'Dashboard',
+    mentors: 'Mentorlar',
+    categories: 'Kategoriyalar',
+    courses: 'Kurslar',
+    skills: 'Ko‘nikmalar',
+    requests: 'So‘rovlar',
+    news: 'Yangiliklar',
+  }
+  return titles[page] || 'Admin Panel'
 }
 </script>
