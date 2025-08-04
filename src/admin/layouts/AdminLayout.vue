@@ -8,15 +8,15 @@
     ></div>
 
     <!-- Sidebar -->
-   <AdminSidebar
-  :currentPage="currentPage"
-  :username="username"
-  :isOpen="isSidebarOpen"
-  :isMobile="true"
-  @update:page="handlePageChange"
-  @close-sidebar="isSidebarOpen = false"
-  @logout="handleLogout"
-/>
+    <AdminSidebar
+      :currentPage="currentPage"
+      :username="username"
+      :isOpen="isSidebarOpen"
+      :isMobile="true"
+      @update:page="handlePageChange"
+      @close-sidebar="isSidebarOpen = false"
+      @logout="handleLogout"
+    />
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden ml-0 md:ml-64">
@@ -64,15 +64,17 @@ import News from '@/admin/views/News.vue'
 const auth = useAuthStore()
 const router = useRouter()
 
-// State
-const currentPage = ref('dashboard')
+// LocalStorage dan so‘nggi ochilgan sahifani olish
+const savedPage = localStorage.getItem('currentPage') || 'dashboard'
+const currentPage = ref(savedPage)
 const isSidebarOpen = ref(false)
 const username = 'Admin'
 
-// Sahifani o‘zgartirish
+// Sahifani o‘zgartirish va saqlash
 function handlePageChange(page: string) {
   currentPage.value = page
-  isSidebarOpen.value = false // mobilda menyuni yopish
+  localStorage.setItem('currentPage', page) // LocalStorage ga saqlash
+  isSidebarOpen.value = false // Mobil holatda menyuni yopish
 }
 
 // Logout
@@ -81,7 +83,7 @@ function handleLogout() {
   router.push('/admin/login')
 }
 
-// Sidebar toggle (mobil)
+// Mobil sidebar toggle
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
 }

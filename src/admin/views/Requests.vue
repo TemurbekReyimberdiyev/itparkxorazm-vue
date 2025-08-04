@@ -62,43 +62,45 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
     </div>
 
     <!-- Stats -->
-    <div class="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted-foreground">Jami So'rovlar</p>
-              <p class="text-2xl font-semibold">{{ totalRequests }}</p>
-            </div>
-            <Mail class="w-8 h-8 text-blue-500" />
-          </div>
-        </CardContent>
-      </Card>
+    <!-- Stats -->
+<div class="flex flex-wrap gap-4">
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs sm:text-sm text-muted-foreground">Jami So'rovlar</p>
+          <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
+        </div>
+        <Mail class="w-6 sm:w-8 h-6 sm:h-8 text-blue-500" />
+      </div>
+    </CardContent>
+  </Card>
 
-      <Card>
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted-foreground">Bugun</p>
-              <p class="text-2xl font-semibold">{{ todayRequests }}</p>
-            </div>
-            <CheckCircle class="w-8 h-8 text-green-500" />
-          </div>
-        </CardContent>
-      </Card>
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs sm:text-sm text-muted-foreground">Bugun</p>
+          <p class="text-lg sm:text-2xl font-semibold">{{ todayRequests }}</p>
+        </div>
+        <CheckCircle class="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
+      </div>
+    </CardContent>
+  </Card>
 
-      <Card>
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted-foreground">Javob kutmoqda</p>
-              <p class="text-2xl font-semibold">{{ totalRequests }}</p>
-            </div>
-            <Phone class="w-8 h-8 text-orange-500" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs sm:text-sm text-muted-foreground">Javob kutmoqda</p>
+          <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
+        </div>
+        <Phone class="w-6 sm:w-8 h-6 sm:h-8 text-orange-500" />
+      </div>
+    </CardContent>
+  </Card>
+</div>
+  
 
     <!-- Table -->
     <Card>

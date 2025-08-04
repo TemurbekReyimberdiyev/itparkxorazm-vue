@@ -5,16 +5,21 @@
       <p class="text-muted-foreground">IT O'quv Markazi boshqaruv paneli</p>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card v-for="(stat, index) in stats" :key="index">
+    <!-- Stat Cards (always 4 in 1 row even on mobile) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <Card
+        v-for="(stat, index) in stats"
+        :key="index"
+        class="p-3"
+      >
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle class="font-medium">{{ stat.title }}</CardTitle>
+          <CardTitle class="text-sm font-medium">{{ stat.title }}</CardTitle>
           <div :class="`p-2 rounded-md text-white ${stat.color}`">
             <component :is="stat.icon" class="w-4 h-4" />
           </div>
         </CardHeader>
         <CardContent>
-          <div class="font-semibold">{{ stat.value }}</div>
+          <div class="text-lg font-semibold">{{ stat.value }}</div>
         </CardContent>
       </Card>
     </div>
@@ -101,32 +106,37 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Card, CardHeader, CardTitle, CardContent } from '@/admin/components/ui/card';
-import { Badge } from '@/admin/components/ui/badge';
-import { BookOpen, Users, FolderOpen, MessageCircle, TrendingUp } from 'lucide-vue-next';
-import { categories, courses, mentors, requests, news } from '@/admin/data/mockData';
+import { computed } from 'vue'
+import { Card, CardHeader, CardTitle, CardContent } from '@/admin/components/ui/card'
+import { Badge } from '@/admin/components/ui/badge'
+import { BookOpen, Users, FolderOpen, MessageCircle, TrendingUp } from 'lucide-vue-next'
+import { categories, courses, mentors, requests, news } from '@/admin/data/mockData'
 
 const stats = [
   { title: 'Jami Kurslar', value: courses.length, icon: BookOpen, color: 'bg-blue-500' },
   { title: 'Mentorlar', value: mentors.length, icon: Users, color: 'bg-green-500' },
   { title: 'Kategoriyalar', value: categories.length, icon: FolderOpen, color: 'bg-purple-500' },
-  { title: "Yangi So'rovlar", value: requests.length, icon: MessageCircle, color: 'bg-orange-500' }
-];
+  { title: "Yangi So'rovlar", value: requests.length, icon: MessageCircle, color: 'bg-orange-500' },
+]
 
-const totalStudents = computed(() => mentors.reduce((sum, m) => sum + m.students, 0));
-const averageExperience = computed(() => mentors.reduce((sum, m) => sum + m.experience_years, 0) / mentors.length);
+const totalStudents = computed(() =>
+  mentors.reduce((sum, m) => sum + m.students, 0)
+)
 
-const getCourseName = (id) => courses.find(c => c.id === id)?.name || 'Nomalum';
-const getCategoryName = (id) => categories.find(c => c.id === id)?.name || 'Nomalum';
-const getMentor = (courseId) => mentors.find(m => m.course_id === courseId);
+const averageExperience = computed(() =>
+  mentors.reduce((sum, m) => sum + m.experience_years, 0) / mentors.length
+)
+
+const getCourseName = (id) => courses.find((c) => c.id === id)?.name || 'Nomalum'
+const getCategoryName = (id) => categories.find((c) => c.id === id)?.name || 'Nomalum'
+const getMentor = (courseId) => mentors.find((m) => m.course_id === courseId)
 </script>
 
 <style scoped>
 .text-muted-foreground {
-  color: #6b7280; /* Tailwind slate-500 */
+  color: #6b7280;
 }
 .bg-muted\/50 {
-  background-color: rgba(243, 244, 246, 0.5); /* Tailwind gray-100 */
+  background-color: rgba(243, 244, 246, 0.5);
 }
 </style>

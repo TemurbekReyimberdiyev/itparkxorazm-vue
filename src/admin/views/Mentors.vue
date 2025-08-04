@@ -125,24 +125,29 @@ const isSkillSelected = (mentorId, skillId) => mentorSkills.value.some(ms => ms.
 <template>
   <div class="space-y-6">
     <!-- Cards and Stats -->
-    <div class="grid gap-4 md:grid-cols-4">
-      <Card v-for="(stat, i) in [
-        { title: 'Jami Mentorlar', value: mentorsData.length, color: 'text-blue-500' },
-        { title: 'Jami Talabalar', value: mentorsData.reduce((sum, m) => sum + m.students, 0), color: 'text-green-500' },
-        { title: 'O‘rtacha Tajriba', value: (mentorsData.reduce((sum, m) => sum + m.experience_years, 0) / mentorsData.length).toFixed(1) + ' yil', color: 'text-purple-500' },
-        { title: 'Faol Ko‘nikmalar', value: mentorSkills.length, color: 'text-orange-500' }
-      ]" :key="i">
-        <CardContent class="p-6">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-sm text-muted-foreground">{{ stat.title }}</p>
-              <p class="text-2xl font-semibold">{{ stat.value }}</p>
-            </div>
-            <Award :class="`w-8 h-8 ${stat.color}`" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <!-- Cards and Stats -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+  <Card
+    v-for="(stat, i) in [
+      { title: 'Jami Mentorlar', value: mentorsData.length, color: 'text-blue-500' },
+      { title: 'Jami Talabalar', value: mentorsData.reduce((sum, m) => sum + m.students, 0), color: 'text-green-500' },
+      { title: 'O‘rtacha Tajriba', value: (mentorsData.reduce((sum, m) => sum + m.experience_years, 0) / mentorsData.length).toFixed(1) + ' yil', color: 'text-purple-500' },
+      { title: 'Faol Ko‘nikmalar', value: mentorSkills.length, color: 'text-orange-500' }
+    ]"
+    :key="i"
+    class="p-3"
+  >
+    <CardContent class="p-4">
+      <div class="flex justify-between items-center">
+        <div class="truncate">
+          <p class="text-xs text-muted-foreground">{{ stat.title }}</p>
+          <p class="text-lg font-semibold">{{ stat.value }}</p>
+        </div>
+        <Award :class="`w-6 h-6 ${stat.color}`" />
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
     <!-- Table of Mentors -->
     <Card>

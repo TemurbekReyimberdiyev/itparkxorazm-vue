@@ -140,40 +140,43 @@ function getDefaultImageUrl(skillName: string) {
       </Dialog>
     </div>
 
-    <!-- Stats -->
-    <div class="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardContent class="p-6 flex justify-between items-center">
-          <div>
-            <p class="text-sm text-muted-foreground">Jami Ko'nikmalar</p>
-            <p class="text-2xl font-semibold">{{ skillsData.length }}</p>
-          </div>
-          <Award class="w-8 h-8 text-blue-500" />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent class="p-6 flex justify-between items-center">
-          <div>
-            <p class="text-sm text-muted-foreground">Faol Ko'nikmalar</p>
-            <p class="text-2xl font-semibold">
-              {{ skillsData.filter(s => getMentorCount(s.id) > 0).length }}
-            </p>
-          </div>
-          <Users class="w-8 h-8 text-green-500" />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent class="p-6 flex justify-between items-center">
-          <div>
-            <p class="text-sm text-muted-foreground">Eng Mashhur</p>
-            <p class="text-2xl font-semibold">
-              {{ skillsData.length ? skillsData.reduce((a, b) => getMentorCount(b.id) > getMentorCount(a.id) ? b : a).name.slice(0, 10) : '-' }}
-            </p>
-          </div>
-          <Award class="w-8 h-8 text-purple-500" />
-        </CardContent>
-      </Card>
-    </div>
+    <!-- Skills Stats -->
+<div class="flex flex-wrap gap-4">
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
+      <div>
+        <p class="text-xs sm:text-sm text-muted-foreground">Jami Ko'nikmalar</p>
+        <p class="text-lg sm:text-2xl font-semibold">{{ skillsData.length }}</p>
+      </div>
+      <Award class="w-6 sm:w-8 h-6 sm:h-8 text-blue-500" />
+    </CardContent>
+  </Card>
+
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
+      <div>
+        <p class="text-xs sm:text-sm text-muted-foreground">Faol Ko'nikmalar</p>
+        <p class="text-lg sm:text-2xl font-semibold">
+          {{ skillsData.filter(s => getMentorCount(s.id) > 0).length }}
+        </p>
+      </div>
+      <Users class="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
+    </CardContent>
+  </Card>
+
+  <Card class="flex-1 min-w-[150px]">
+    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
+      <div>
+        <p class="text-xs sm:text-sm text-muted-foreground">Eng Mashhur</p>
+        <p class="text-lg sm:text-2xl font-semibold">
+          {{ skillsData.length ? skillsData.reduce((a, b) => getMentorCount(b.id) > getMentorCount(a.id) ? b : a).name.slice(0, 10) : '-' }}
+        </p>
+      </div>
+      <Award class="w-6 sm:w-8 h-6 sm:h-8 text-purple-500" />
+    </CardContent>
+  </Card>
+</div>
+
 
     <!-- Skills Table -->
     <Card>
