@@ -7,6 +7,7 @@
         <p class="text-muted-foreground">O'quv kurslarini boshqaring</p>
       </div>
 
+      <!-- Kurs qo'shish uchun dialog -->
       <Dialog :open="isDialogOpen" @update:open="setDialogOpen">
         <DialogTrigger as-child>
           <Button @click="prepareAddCourse">
@@ -80,12 +81,12 @@
                 />
               </div>
               <div class="space-y-2">
-                <label>Rasm URL</label>
+                <label>Kurs Rasmi</label>
                 <ImageUpload
-  :value="formData.image_url"
-  @change="(url) => formData.image_url = url"
-  placeholder="Kurs rasmini yuklang"
-/>
+                  :value="formData.image_url"
+                  @change="(url) => formData.image_url = url"
+                  placeholder="Kurs rasmini yuklang"
+                />
               </div>
             </div>
 
@@ -102,7 +103,7 @@
       </Dialog>
     </div>
 
-    <!-- Table qismi -->
+    <!-- Kurslar jadvali -->
     <Card>
       <CardHeader>
         <CardTitle>Barcha Kurslar ({{ coursesData.length }})</CardTitle>
@@ -147,7 +148,7 @@
                   <Button size="sm" variant="outline" @click="handleEdit(course)">
                     <Edit class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="handleDelete(course.id)">
+                  <Button size="sm" variant="destructive" @click="confirmDelete(course)">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>
@@ -157,63 +158,97 @@
         </Table>
       </CardContent>
     </Card>
+
+    <!-- Kurs tafsilotlarini ko‘rsatish -->
     <Dialog :open="isViewDialogOpen" @update:open="val => isViewDialogOpen = val">
-  <DialogContent class="w-full max-w-2xl">
-    <DialogHeader>
-      <DialogTitle>Kurs Tafsilotlari</DialogTitle>
-    </DialogHeader>
-    <div v-if="viewingCourse" class="space-y-4">
-      <img :src="viewingCourse.image_url" class="w-full h-64 object-cover rounded-lg" alt="Kurs rasmi" />
-      <div>
-        <h3 class="text-xl font-semibold">{{ viewingCourse.name }}</h3>
-        <p class="text-muted-foreground">{{ viewingCourse.heading }}</p>
-        <p class="mt-2">{{ viewingCourse.description }}</p>
-      </div>
-      <div class="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-        <p><strong>Kategoriya:</strong> {{ getCategoryName(viewingCourse.category_id) }}</p>
-        <p><strong>Davomiyligi:</strong> {{ viewingCourse.duration_month }} oy</p>
-        <p><strong>Narxi:</strong> {{ formatPrice(viewingCourse.cost) }}</p>
-      </div>
-      <div class="flex justify-end">
-        <Button variant="outline" @click="isViewDialogOpen = false">Yopish</Button>
-      </div>
-    </div>
-  </DialogContent>
-</Dialog>
+      <DialogContent class="w-full max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Kurs Tafsilotlari</DialogTitle>
+        </DialogHeader>
+        <div v-if="viewingCourse" class="space-y-4">
+          <img :src="viewingCourse.image_url" class="w-full h-64 object-cover rounded-lg" alt="Kurs rasmi" />
+          <div>
+            <h3 class="text-xl font-semibold">{{ viewingCourse.name }}</h3>
+            <p class="text-muted-foreground">{{ viewingCourse.heading }}</p>
+            <p class="mt-2">{{ viewingCourse.description }}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+            <p><strong>Kategoriya:</strong> {{ getCategoryName(viewingCourse.category_id) }}</p>
+            <p><strong>Davomiyligi:</strong> {{ viewingCourse.duration_month }} oy</p>
+            <p><strong>Narxi:</strong> {{ formatPrice(viewingCourse.cost) }}</p>
+          </div>
+          <div class="flex justify-end">
+            <Button variant="outline" @click="isViewDialogOpen = false">Yopish</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- O'chirishni tasdiqlash modali -->
+    <Dialog :open="isConfirmDeleteOpen" @update:open="isConfirmDeleteOpen = $event">
+      <DialogContent class="w-full max-w-md">
+        <DialogHeader>
+          <DialogTitle>Kursni o‘chirishni tasdiqlang</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-4">
+          <p>Ushbu kursni o‘chirishni xohlaysizmi?</p>
+          <p><strong>{{ courseToDelete?.name }}</strong></p>
+          <div class="flex justify-end gap-2">
+            <Button variant="outline" @click="isConfirmDeleteOpen = false">Yo‘q</Button>
+            <Button variant="destructive" @click="performDelete">Ha</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next';
+import { ref } from 'vue'
+import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next'
 
-import {Button} from '@/admin/components/ui/button';
-import {Input} from '@/admin/components/ui/input';
-import {Textarea} from '@/admin/components/ui/textarea';
-import {Badge} from '@/admin/components/ui/badge';
+import { Button } from '@/admin/components/ui/button'
+import { Input } from '@/admin/components/ui/input'
+import { Textarea } from '@/admin/components/ui/textarea'
+import { Badge } from '@/admin/components/ui/badge'
 import ImageUpload from '@/admin/views/ImageUpload.vue'
 
-import {Card, CardContent, CardHeader, CardTitle} from '@/admin/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/admin/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/admin/components/ui/dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/admin/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/admin/components/ui/select'
 
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/admin/components/ui/dialog';
+import { courses as initialCourses, categories } from '@/admin/data/mockData'
+import type { Course } from '@/admin/types/database'
 
+const coursesData = ref<Course[]>([...initialCourses])
+const isDialogOpen = ref(false)
+const editingCourse = ref<Course | null>(null)
+const isViewDialogOpen = ref(false)
+const viewingCourse = ref<Course | null>(null)
 
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/admin/components/ui/table';
-
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/admin/components/ui/select';
-
-import { courses as initialCourses, categories } from '@/admin/data/mockData';
-import type { Course } from '@/admin/types/database';
-const isViewDialogOpen = ref(false);
-const viewingCourse = ref<Course | null>(null);
-const imageUrl = ref('')
-const handleView = (course: Course) => {
-  viewingCourse.value = course;
-  isViewDialogOpen.value = true;
-};
-const coursesData = ref<Course[]>([...initialCourses]);
-const isDialogOpen = ref(false);
-const editingCourse = ref<Course | null>(null);
+// Tasdiqlash modali uchun
+const isConfirmDeleteOpen = ref(false)
+const courseToDelete = ref<Course | null>(null)
 
 const formData = ref<Partial<Course>>({
   name: '',
@@ -222,14 +257,14 @@ const formData = ref<Partial<Course>>({
   category_id: 1,
   duration_month: 1,
   cost: 0,
-  image_url: ''
-});
+  image_url: '',
+})
 
 const prepareAddCourse = () => {
-  editingCourse.value = null;
-  resetForm();
-  isDialogOpen.value = true;
-};
+  editingCourse.value = null
+  resetForm()
+  isDialogOpen.value = true
+}
 
 const resetForm = () => {
   formData.value = {
@@ -239,45 +274,59 @@ const resetForm = () => {
     category_id: 1,
     duration_month: 1,
     cost: 0,
-    image_url: ''
-  };
-};
+    image_url: '',
+  }
+}
 
 const setDialogOpen = (val: boolean) => {
-  isDialogOpen.value = val;
+  isDialogOpen.value = val
   if (!val) {
-    editingCourse.value = null;
-    resetForm();
+    editingCourse.value = null
+    resetForm()
   }
-};
+}
 
 const handleSubmit = () => {
   if (editingCourse.value) {
     coursesData.value = coursesData.value.map((c) =>
       c.id === editingCourse.value!.id ? { ...c, ...formData.value } as Course : c
-    );
+    )
   } else {
-    const newId = Math.max(...coursesData.value.map((c) => c.id)) + 1;
-    coursesData.value.push({ id: newId, ...formData.value } as Course);
+    const newId = Math.max(...coursesData.value.map((c) => c.id)) + 1
+    coursesData.value.push({ id: newId, ...formData.value } as Course)
   }
-  setDialogOpen(false);
-};
+  setDialogOpen(false)
+}
 
 const handleEdit = (course: Course) => {
-  editingCourse.value = { ...course };
-  formData.value = { ...course };
-  isDialogOpen.value = true;
-};
+  editingCourse.value = { ...course }
+  formData.value = { ...course }
+  isDialogOpen.value = true
+}
 
-const handleDelete = (id: number) => {
-  coursesData.value = coursesData.value.filter((c) => c.id !== id);
-};
+const handleView = (course: Course) => {
+  viewingCourse.value = course
+  isViewDialogOpen.value = true
+}
+
+const confirmDelete = (course: Course) => {
+  courseToDelete.value = course
+  isConfirmDeleteOpen.value = true
+}
+
+const performDelete = () => {
+  if (courseToDelete.value) {
+    coursesData.value = coursesData.value.filter((c) => c.id !== courseToDelete.value!.id)
+  }
+  isConfirmDeleteOpen.value = false
+  courseToDelete.value = null
+}
 
 const getCategoryName = (categoryId: number) => {
-  return categories.find((cat) => cat.id === categoryId)?.name || 'Noma\'lum';
-};
+  return categories.find((cat) => cat.id === categoryId)?.name || 'Noma\'lum'
+}
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
-};
+  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm"
+}
 </script>

@@ -98,7 +98,7 @@
               <TableCell class="flex gap-2">
                 <Button size="sm" variant="outline" @click="handleView(item)"><Eye class="w-4 h-4" /></Button>
                 <Button size="sm" variant="outline" @click="handleEdit(item)"><Edit class="w-4 h-4" /></Button>
-                <Button size="sm" variant="destructive" @click="handleDelete(item.id)"><Trash2 class="w-4 h-4" /></Button>
+                <Button size="sm" variant="destructive" @click="confirmDelete(item)"><Trash2 class="w-4 h-4" /></Button>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -135,6 +135,20 @@
 </Dialog>
 
   </div>
+  <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+  <DialogContent class="max-w-md">
+    <DialogHeader>
+      <DialogTitle>Yangilikni o'chirishni tasdiqlang</DialogTitle>
+    </DialogHeader>
+    <p class="text-sm text-muted-foreground">
+      "{{ newsToDelete?.heading }}" sarlavhali xabarni o'chirishni xohlaysizmi? Bu amal qaytarilmaydi.
+    </p>
+    <div class="flex justify-end gap-2 mt-4">
+      <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+      <Button variant="destructive" @click="handleDeleteConfirmed">Ha, o'chir</Button>
+    </div>
+  </DialogContent>
+</Dialog>
 </template>
 
 <script setup>
@@ -152,6 +166,23 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '
 
 import { Plus, Edit, Trash2, Eye, Calendar, TrendingUp } from 'lucide-vue-next';
 import { news as initialNews } from '@/admin/data/mockData';
+
+const isDeleteDialogOpen = ref(false)
+const newsToDelete = ref(null)
+
+function confirmDelete(newsItem) {
+  newsToDelete.value = newsItem
+  isDeleteDialogOpen.value = true
+}
+
+function handleDeleteConfirmed() {
+  if (newsToDelete.value) {
+    newsData.value = newsData.value.filter(item => item.id !== newsToDelete.value.id)
+  }
+  isDeleteDialogOpen.value = false
+  newsToDelete.value = null
+}
+
 
 const newsData = ref([...initialNews]);
 const isDialogOpen = ref(false);

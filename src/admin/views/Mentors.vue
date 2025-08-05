@@ -37,6 +37,23 @@ import { Checkbox } from '@/admin/components/ui/checkbox'
 import { Plus, Edit, Trash2, Eye, Award } from 'lucide-vue-next'
 import { mentors as initialMentors, courses, skills } from '@/admin/data/mockData'
 
+
+const isDeleteConfirmOpen = ref(false)
+const mentorToDelete = ref(null)
+
+const confirmDelete = (mentor) => {
+  mentorToDelete.value = mentor
+  isDeleteConfirmOpen.value = true
+}
+
+const performDelete = () => {
+  if (mentorToDelete.value) {
+    handleDelete(mentorToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    mentorToDelete.value = null
+  }
+}
+
 const mentorsData = ref([...initialMentors])
 const mentorSkills = ref([
   { id: 1, mentor_id: 1, skill_id: 1 },
@@ -196,7 +213,7 @@ const isSkillSelected = (mentorId, skillId) => mentorSkills.value.some(ms => ms.
                 <div class="flex gap-2">
                   <Button size="sm" variant="outline" @click="handleSkillsManagement(mentor)"><Award class="w-4 h-4" /></Button>
                   <Button size="sm" variant="outline" @click="handleEdit(mentor)"><Edit class="w-4 h-4" /></Button>
-                  <Button size="sm" variant="destructive" @click="handleDelete(mentor.id)"><Trash2 class="w-4 h-4" /></Button>
+                  <Button size="sm" variant="destructive" @click="confirmDelete(mentor)"><Trash2 class="w-4 h-4" /></Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -316,6 +333,23 @@ const isSkillSelected = (mentorId, skillId) => mentorSkills.value.some(ms => ms.
       </DialogContent>
     </Dialog>
   </div>
+  <!-- Delete Confirmation Dialog -->
+<Dialog :open="isDeleteConfirmOpen" @update:open="val => isDeleteConfirmOpen = val">
+  <DialogContent class="max-w-md">
+    <DialogHeader>
+      <DialogTitle>Ushbu ma'lumotni o'chirmoqchimisiz?</DialogTitle>
+    </DialogHeader>
+    <div class="space-y-4">
+      <p class="text-sm text-muted-foreground">
+        <strong>{{ mentorToDelete?.first_name }} {{ mentorToDelete?.last_name }}</strong> ismli mentor ma'lumotlari o'chiriladi. Ishonchingiz komilmi?
+      </p>
+      <div class="flex justify-end gap-2">
+        <Button variant="outline" @click="isDeleteConfirmOpen = false">Yo‘q</Button>
+        <Button variant="destructive" @click="performDelete">Ha, o‘chirish</Button>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
 </template>
 
 <style scoped></style>

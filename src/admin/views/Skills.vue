@@ -18,6 +18,18 @@ import { Plus, Edit, Trash2, Award, Users } from 'lucide-vue-next'
 import { skills as initialSkills, mentors } from '@/admin/data/mockData'
 import type { Skill } from '@/admin/types/database'
 
+const isDeleteDialogOpen = ref(false)
+const skillToDelete = ref<Skill | null>(null)
+
+function handleDeleteConfirm() {
+  if (skillToDelete.value) {
+    skillsData.value = skillsData.value.filter(skill => skill.id !== skillToDelete.value!.id)
+    skillToDelete.value = null
+  }
+  isDeleteDialogOpen.value = false
+}
+
+
 // State
 const skillsData = ref<Skill[]>([...initialSkills])
 const isDialogOpen = ref(false)
@@ -209,7 +221,7 @@ function getDefaultImageUrl(skillName: string) {
                   <Button size="sm" variant="outline" @click="handleEdit(skill)">
                     <Edit class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="handleDelete(skill.id)">
+                  <Button size="sm" variant="destructive" @click="() => { skillToDelete = skill; isDeleteDialogOpen = true }">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>
@@ -264,4 +276,19 @@ function getDefaultImageUrl(skillName: string) {
       </CardContent>
     </Card>
   </div>
+  <!-- <template> bo‘limining oxirida joylashtiring: -->
+<Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Ko'nikmani o'chirishni tasdiqlaysizmi?</DialogTitle>
+    </DialogHeader>
+    <p class="text-sm text-muted-foreground">
+      "{{ skillToDelete?.name }}" nomli ko‘nikma va unga bog‘langan mentorlar ro‘yxati o‘chiriladi.
+    </p>
+    <div class="flex justify-end gap-2 mt-4">
+      <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+      <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
+    </div>
+  </DialogContent>
+</Dialog>
 </template>

@@ -27,6 +27,18 @@ import { Button } from '@/admin/components/ui/button'
 import { requests as mockRequests, courses } from '@/admin/data/mockData'
 import type { Request } from '@/admin/types/database'
 
+
+const isDeleteDialogOpen = ref(false)
+const requestToDelete = ref<Request | null>(null)
+
+const handleDeleteConfirm = () => {
+  if (requestToDelete.value) {
+    requestsData.value = requestsData.value.filter(req => req.id !== requestToDelete.value!.id)
+    requestToDelete.value = null
+  }
+  isDeleteDialogOpen.value = false
+}
+
 const requestsData = ref<Request[]>([...mockRequests])
 const selectedRequest = ref<Request | null>(null)
 const isDetailDialogOpen = ref(false)
@@ -135,7 +147,7 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
                   <Button size="sm" variant="outline" @click="handleViewDetails(req)">
                     <Eye class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="handleDelete(req.id)">
+                  <Button size="sm" variant="destructive" @click="() => { requestToDelete = req; isDeleteDialogOpen = true }">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>
@@ -196,4 +208,18 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
       </DialogContent>
     </Dialog>
   </div>
+  <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>So'rovni o'chirishni tasdiqlaysizmi?</DialogTitle>
+    </DialogHeader>
+    <p class="text-sm text-muted-foreground">
+      "{{ requestToDelete?.name }}" ismli foydalanuvchining so‘rovi o‘chiriladi. Davom etasizmi?
+    </p>
+    <div class="flex justify-end gap-2 mt-4">
+      <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+      <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
+    </div>
+  </DialogContent>
+</Dialog>
 </template>
