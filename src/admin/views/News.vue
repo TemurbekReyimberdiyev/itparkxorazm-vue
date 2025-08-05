@@ -27,9 +27,13 @@
         <Textarea v-model="formData.description" rows="5" placeholder="Xabar matnini kiriting" required />
       </div>
       <div class="space-y-2">
-        <label>Rasm URL</label>
-        <Input v-model="formData.image_url" placeholder="https://example.com/image.jpg" />
-        <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p>
+        <label>Yangilik rasmi</label>
+        <ImageUpload
+    :value="formData.image_url"
+    @change="(url) => formData.image_url = url"
+    placeholder="Yangilik rasmini yuklang"
+  />
+        <!-- <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p> -->
       </div>
       <div v-if="formData.heading || formData.description" class="space-y-2">
         <label>Preview</label>
@@ -140,6 +144,7 @@ import {Button} from '@/admin/components/ui/button';
 import {Input} from '@/admin/components/ui/input';
 import {Textarea} from '@/admin/components/ui/textarea';
 import {Badge} from '@/admin/components/ui/badge';
+import ImageUpload from '@/admin/views/ImageUpload.vue'
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/admin/components/ui/card';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/admin/components/ui/table';

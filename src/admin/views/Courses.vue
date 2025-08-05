@@ -81,10 +81,11 @@
               </div>
               <div class="space-y-2">
                 <label>Rasm URL</label>
-                <Input
-                  v-model="formData.image_url"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <ImageUpload
+  :value="formData.image_url"
+  @change="(url) => formData.image_url = url"
+  placeholder="Kurs rasmini yuklang"
+/>
               </div>
             </div>
 
@@ -190,6 +191,7 @@ import {Button} from '@/admin/components/ui/button';
 import {Input} from '@/admin/components/ui/input';
 import {Textarea} from '@/admin/components/ui/textarea';
 import {Badge} from '@/admin/components/ui/badge';
+import ImageUpload from '@/admin/views/ImageUpload.vue'
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/admin/components/ui/card';
 
@@ -204,7 +206,7 @@ import { courses as initialCourses, categories } from '@/admin/data/mockData';
 import type { Course } from '@/admin/types/database';
 const isViewDialogOpen = ref(false);
 const viewingCourse = ref<Course | null>(null);
-
+const imageUrl = ref('')
 const handleView = (course: Course) => {
   viewingCourse.value = course;
   isViewDialogOpen.value = true;

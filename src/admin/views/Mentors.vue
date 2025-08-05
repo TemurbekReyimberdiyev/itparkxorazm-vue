@@ -16,6 +16,7 @@ import {
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
+import ImageUpload from '@/admin/views/ImageUpload.vue'
 import {
   Select,
   SelectContent,
@@ -275,11 +276,11 @@ const isSkillSelected = (mentorId, skillId) => mentorSkills.value.some(ms => ms.
         />
       </div>
       <div class="space-y-2">
-        <label>Rasm URL</label>
-        <Input
-          v-model="formData.image_url"
-          placeholder="https://example.com/image.jpg"
-        />
+        <label>Profil rasmi</label>
+        <ImageUpload
+    v-model:value="formData.image_url"
+    placeholder="Mentor rasmini yuklang"
+  />
       </div>
     </div>
 

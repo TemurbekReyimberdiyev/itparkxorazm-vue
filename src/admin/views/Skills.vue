@@ -12,7 +12,7 @@ import {
 import { Badge } from '@/admin/components/ui/badge'
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
-
+import ImageUpload from '@/admin/views/ImageUpload.vue'
 import { Plus, Edit, Trash2, Award, Users } from 'lucide-vue-next'
 
 import { skills as initialSkills, mentors } from '@/admin/data/mockData'
@@ -120,10 +120,14 @@ function getDefaultImageUrl(skillName: string) {
               <Input v-model="formData.name" required placeholder="Ko'nikma nomini kiriting" />
             </div>
             <div class="space-y-2">
-              <label>Rasm URL</label>
-              <Input v-model="formData.image_url" placeholder="https://example.com/image.jpg" />
-              <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p>
-            </div>
+  <label>Ko'nikma rasmi</label>
+  <ImageUpload
+    :value="formData.image_url"
+    @change="(url) => formData.image_url = url"
+    placeholder="Ko'nikma rasmini yuklang"
+  />
+  <!-- <p class="text-sm text-muted-foreground">Bo'sh qoldirilsa, default rasm avtomatik qo‘shiladi</p> -->
+</div>
             <div v-if="formData.name" class="space-y-2">
               <label>Preview</label>
               <div class="flex items-center gap-3 p-3 border rounded-lg">
