@@ -73,16 +73,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Carousel, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import NewsCard from '../components/NewsCard.vue'
-
-// 🖼 Rasmlarni import qilish
-import news1 from '../assets/images/itparkxorazm.jpeg'
-import news2 from '../assets/images/itparkxorazm2.jpg'
-import news3 from '../assets/images/itparkxorazm.jpeg'
-import news4 from '../assets/images/itparkxorazm2.jpg'
+import api from '@/lib/axios' // API client
 
 // Carousel boshqaruvi
 const newsCarousel = ref(null)
@@ -95,33 +90,23 @@ const carouselBreakpoints = {
   0:    { itemsToShow: 1 }
 }
 
-// Yangiliklar ro'yxati (rasmlar import qilingan)
-const newsList = [
-  {
-    image: news1,
-    date: '11 Iyun 2025',
-    title: 'O‘zaro manfaatli hamkorlik – AloqaBank va CDB uchrashuvi',
-    description: "AloqaBank va CDB banki o‘rtasida yangi strategik kelishuv imzolandi.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
-  },
-  {
-    image: news2,
-    date: '4 Iyun 2025',
-    title: 'Yangi avlod tadbirlari: Parrandachilikni rivojlantirish yo‘li',
-    description: "Yosh tadbirkorlar uchun parrandachilik seminarlarining ilk bosqichi boshlandi. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
-  },
-  {
-    image: news3,
-    date: '3 Iyun 2025',
-    title: 'AloqaBank Mahalla bankilari – moliyaviy ishonchli yordamchingiz!',
-    description: "Mahalla bankilari aholiga yaqinroq xizmat ko‘rsatish uchun joriy qilindi. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
-  },
-  {
-    image: news4,
-    date: '1 Iyun 2025',
-    title: 'Yoshlar uchun yangi grant loyihasi ishga tushdi',
-    description: "Startap loyihalarni qo‘llab-quvvatlovchi grant dasturi e’lon qilindi. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
+// API dan keladigan yangiliklar ro‘yxati
+const newsList = ref([])
+
+// Ma’lumotni API’dan olish
+const fetchNews = async () => {
+  try {
+    const res = await api.get('/news') // Laravel route: Route::get('/news', ...)
+    newsList.value = res.data.map(item => ({
+      image: item.full_image_url,
+      date: new Date(item.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' }),
+      title: item.heading,
+      description: item.description
+    }))
+  } catch (error) {
+    console.error('Yangiliklarni olishda xatolik:', error)
   }
-]
+}
 
 // Modal holati
 const showModal = ref(false)
@@ -142,17 +127,7 @@ const closeModal = () => {
     showModal.value = false
   }, 200)
 }
-</script>
 
-<style scoped>
-.scale-0 {
-  transform: scale(0);
-  opacity: 0;
-  transition: all 0.3s ease-in-out;
-}
-.scale-100 {
-  transform: scale(1);
-  opacity: 1;
-  transition: all 0.3s ease-in-out;
-}
-</style>
+// Komponent yuklanganda yangiliklarni olish
+onMounted(fetchNews)
+</script>

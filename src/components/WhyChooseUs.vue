@@ -54,16 +54,19 @@
             Bepul konsultatsiya va demo darslarga yoziling
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              class="px-8 py-3 bg-white text-green-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              Bepul konsultatsiya
-            </button>
-            <button
-              class="px-8 py-3 border border-white text-white rounded-lg font-medium hover:bg-white/10 transition-colors"
-            >
-              Demo darsi
-            </button>
+            <a
+  href="tel:+998990531199"
+  class="px-8 py-3 bg-white text-green-700 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+>
+  Bepul konsultatsiya
+</a>
+
+<a
+  href="tel:+998990531199"
+  class="px-8 py-3 border border-white text-white rounded-lg font-medium hover:bg-white/10 transition-colors inline-block"
+>
+  Demo darsi
+</a>
           </div>
         </div>
       </div>

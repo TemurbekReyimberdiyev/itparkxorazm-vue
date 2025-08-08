@@ -55,71 +55,39 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import MentorCard from './MentorCard.vue'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
+import api from '@/lib/axios' // API client
 
-// ✅ RASMLARNI IMPORT QILISH
-import imgAlibek from '../assets/images/alibek.jpg'
-import imgIzzatbek from '../assets/images/alibek.jpg'
-import imgHumoyun from '../assets/images/alibek.jpg'
-import imgShoxruh from '../assets/images/alibek.jpg'
-import imgAzamat from '../assets/images/alibek.jpg'
+// Mentorlardan API orqali keladigan ro‘yxat
+const mentors = ref([])
 
-// ✅ MENTOR MA’LUMOTLARI
-const mentors = [
-  {
-    name: "Temurbek Reyimberdiyev",
-    field: "Kompyuter Savodxonligi",
-    education: "TATU magistr",
-    experience: "3 yil",
-    students: "500+",
-    avatar: imgAlibek,
-    skills: "word excel windows"
-  },
-  {
-    name: "Izzatbek Mahmudjonov",
-    field: "Foundation",
-    education: "PDP, Self-study",
-    experience: "3 yil",
-    students: "300+",
-    avatar: imgIzzatbek,
-    skills: "html css js"
-  },
-  {
-    name: "Humoyun Madrahimov",
-    field: "Grafik Dizayn",
-    education: "Data, Self-study",
-    experience: "3 yil",
-    students: "200+",
-    avatar: imgHumoyun,
-    skills: "photoshop illustrator figma"
-  },
-  {
-    name: "Shoxruh Abdullayev",
-    field: "Frontend Dasturlash",
-    education: "TATU, PDP",
-    experience: "5 yil",
-    students: "400+",
-    avatar: imgShoxruh,
-    skills: "html css js react"
-  },
-  {
-    name: "Azamat Masharipov",
-    field: "Frontend Dasturlash",
-    education: "TATU, PDP",
-    experience: "5 yil",
-    students: "400+",
-    avatar: imgAzamat,
-    skills: "html css js vue"
+// API’dan olish funksiyasi
+const fetchMentors = async () => {
+  try {
+    const res = await api.get('/mentors') // Laravel API route
+    mentors.value = res.data.map(item => ({
+      name: `${item.first_name} ${item.last_name}`,
+      field: item.course?.name || '',
+      education: item.education,
+      experience: `${item.experience_years} yil`,
+      students: `${item.students}+`,
+      avatar: item.image_url.startsWith('http')
+        ? item.image_url
+        : `https://itparkxorazm-laravel.test/storage/${item.image_url}`,
+      skills: item.skills.map(s => s.name).join(', ')
+    }))
+  } catch (err) {
+    console.error('Mentorlarni olishda xatolik:', err)
   }
-]
+}
 
-// ✅ RESPONSIVE UCHUN BREAKPOINTLAR
+// RESPONSIVE breakpoints
 const mentorBreakpoints = {
   1280: { itemsToShow: 4 },
   1024: { itemsToShow: 2 },
   0:    { itemsToShow: 1 }
 }
 
-// ✅ QOLGAN FUNKTSIONAL QISMLAR
+// Carousel funksionalliklari
 const carouselRef = ref(null)
 const activeSlide = ref(0)
 const itemsToShow = ref(4)
@@ -132,6 +100,7 @@ const checkWindowWidth = () => {
 }
 
 onMounted(() => {
+  fetchMentors() // Komponent yuklanganda API chaqirish
   checkWindowWidth()
   window.addEventListener('resize', checkWindowWidth)
 })
@@ -145,6 +114,6 @@ const updateActiveSlide = () => {
 }
 
 const dotsCount = computed(() =>
-  Math.ceil(mentors.length / itemsToShow.value)
+  Math.ceil(mentors.value.length / itemsToShow.value)
 )
 </script>

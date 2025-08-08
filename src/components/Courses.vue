@@ -73,7 +73,7 @@
         v-for="index in dotsCount"
         :key="'dot-' + index"
         @click="goToSlide(index - 1)"
-        :class="[
+        :class="[ 
           'w-3 h-3 rounded-full cursor-pointer transition-all duration-300',
           activeSlide === index - 1 ? 'bg-[#7dba28]' : 'bg-gray-300'
         ]"
@@ -121,26 +121,8 @@ import CourseCard from '../components/CourseCard.vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
 import 'vue3-carousel/dist/carousel.css'
 
-// Assetlar
-import imgGraphic from '../assets/images/graphic.png'
-import imgHumoyun from '../assets/images/graphic.png'
-import imgVideo from '../assets/images/graphic.png'
-import imgDoston from '../assets/images/graphic.png'
-import imgMobilography from '../assets/images/graphic.png'
-import imgAlibek from '../assets/images/graphic.png'
-import imgWeb from '../assets/images/graphic.png'
-import imgMentor from '../assets/images/graphic.png'
-
-const filters = [
-  'IT & Dasturlash',
-  'Media & Dizayn',
-  'Marketing',
-  'Xorijiy tillar',
-  'Robototexnika',
-  'IT Matematika'
-]
-
-const selectedFilter = ref('Media & Dizayn')
+const filters = ref([])
+const selectedFilter = ref('')
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 
@@ -151,7 +133,6 @@ const selectFilter = (filter) => {
   updateActiveSlide()
 }
 
-// Tashqariga bosilganda dropdownni yopish
 const handleClickOutside = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
     dropdownOpen.value = false
@@ -191,55 +172,10 @@ const goToSlide = (i) => {
   activeSlide.value = i
 }
 
-const courses = [
-  {
-    image: imgGraphic,
-    duration: '3 oy',
-    category: 'Media & Dizayn',
-    title: 'Grafik dizayn',
-    description: 'Figma va grafik dizaynni o‘rganib, UI/UX sohasida ish toping.',
-    mentorImage: imgHumoyun,
-    mentorName: 'Madraximov Humoyun',
-    experience: '3-yil',
-    price: '$50'
-  },
-  {
-    image: imgVideo,
-    duration: '3 oy',
-    category: 'Media & Dizayn',
-    title: 'Video montaj',
-    description: 'Video montaj asoslarini o‘rganib, kreativ videolar va kontent yarating.',
-    mentorImage: imgDoston,
-    mentorName: 'Djumayev Doston',
-    experience: '15-yil',
-    price: '$70'
-  },
-  {
-    image: imgMobilography,
-    duration: '2 oy',
-    category: 'Media & Dizayn',
-    title: 'Mobilografiya',
-    description: 'Telefon orqali sifatli va kreativ videolar surating.',
-    mentorImage: imgAlibek,
-    mentorName: 'Madraximov Alibek',
-    experience: '1-yil',
-    price: '$80'
-  },
-  {
-    image: imgWeb,
-    duration: '4 oy',
-    category: 'IT & Dasturlash',
-    title: 'Frontend',
-    description: 'Vue, React va Tailwind o‘rganib, web dasturchi bo‘ling.',
-    mentorImage: imgMentor,
-    mentorName: 'Ali Akbar',
-    experience: '5-yil',
-    price: '$100'
-  }
-]
+const courses = ref([])
 
 const filteredCourses = computed(() =>
-  courses.filter((course) => course.category === selectedFilter.value)
+  courses.value.filter((course) => course.category === selectedFilter.value)
 )
 
 const dotsCount = computed(() => {
@@ -264,6 +200,36 @@ const closeModal = () => {
     showModal.value = false
   }, 200)
 }
+
+// API dan ma’lumot olish
+const fetchCourses = async () => {
+  try {
+    const res = await fetch('https://itparkxorazm-laravel.test/api/courses')
+    const data = await res.json()
+
+    // Ma'lumotlarni formatlash
+    courses.value = data.map(c => ({
+      id: c.id,
+      title: c.name,
+      description: c.heading,
+      duration: c.duration || '',
+      category: c.category?.name || '',
+      image: c.image_url?.startsWith('http') ? c.image_url : `https://itparkxorazm-laravel.test/storage/${c.image_url}`,
+      mentorName: c.mentor?.name || '',
+      mentorImage: c.mentor?.image_url?.startsWith('http') ? c.mentor.image_url : `https://itparkxorazm-laravel.test/storage/${c.mentor?.image_url}`,
+      experience: c.mentor?.experience || '',
+      price: c.price || ''
+    }))
+
+    // Kategoriyalar
+    filters.value = [...new Set(courses.value.map(c => c.category))]
+    selectedFilter.value = filters.value[0] || ''
+  } catch (err) {
+    console.error('API error:', err)
+  }
+}
+
+onMounted(fetchCourses)
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
 <template>
-  <nav class="fixed top-0 left-0 w-full z-50 bg-white shadow transition-all">
+  <nav class="sticky top-0 left-0 w-full z-50 bg-white shadow transition-all">
     <div class="flex items-center justify-between max-w-7xl mx-auto px-4 py-3">
       <!-- Logo -->
       <a href="/" class="flex items-center space-x-3">
