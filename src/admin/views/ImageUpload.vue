@@ -1,16 +1,19 @@
 <template>
   <div :class="['space-y-2', props.className]">
+    <!-- Fayl input -->
     <input
       ref="fileInput"
       type="file"
       accept="image/*"
       class="hidden"
-      @change="handleFileSelect"
+      @change.stop.prevent="handleFileSelect"
     />
 
+    <!-- Agar rasm bor bo'lsa -->
     <div v-if="previewUrl" class="relative group">
       <div class="relative w-full h-32 border border-border rounded-lg overflow-hidden bg-muted">
         <img :src="previewUrl" alt="Preview" class="w-full h-full object-cover" />
+
         <div
           class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
         >
@@ -18,15 +21,17 @@
             variant="destructive"
             size="sm"
             class="absolute top-2 right-2"
-            @click="handleRemove"
+            type="button"
+            @click.stop.prevent="handleRemove"
           >
             <LucideX class="h-4 w-4" />
           </Button>
           <Button
             variant="secondary"
             size="sm"
+            type="button"
             :disabled="isUploading"
-            @click="triggerFileSelect"
+            @click.stop.prevent="triggerFileSelect"
           >
             <LucideUpload class="h-4 w-4 mr-2" />
             O'zgartirish
@@ -35,12 +40,14 @@
       </div>
     </div>
 
+    <!-- Agar rasm yo'q bo'lsa -->
     <Button
       v-else
       variant="outline"
+      type="button"
       class="w-full h-32 border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2"
       :disabled="isUploading"
-      @click="triggerFileSelect"
+      @click.stop.prevent="triggerFileSelect"
     >
       <template v-if="isUploading">
         <div class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
@@ -57,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Button } from '@/admin/components/ui/button' // shadcn-vue button component
+import { Button } from '@/admin/components/ui/button'
 import { LucideUpload, LucideX, LucideImage } from 'lucide-vue-next'
 
 interface Props {
@@ -92,13 +99,13 @@ const handleFileSelect = (event: Event) => {
 
   if (!file) return
 
-  // validate type
+  // Turini tekshirish
   if (!file.type.startsWith('image/')) {
     alert('Iltimos, rasm fayli tanlang')
     return
   }
 
-  // validate size
+  // Hajmini tekshirish
   if (file.size > 5 * 1024 * 1024) {
     alert("Rasm hajmi 5MB dan kichik bo'lishi kerak")
     return
@@ -111,7 +118,7 @@ const handleFileSelect = (event: Event) => {
     const result = e.target?.result as string
     previewUrl.value = result
 
-    // simulate upload
+    // Simulyatsiya qilingan yuklash
     setTimeout(() => {
       emit('update:value', result)
       isUploading.value = false

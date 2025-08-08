@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
 import {
   Card, CardContent, CardHeader, CardTitle
 } from '@/admin/components/ui/card'
@@ -15,23 +17,13 @@ import { Input } from '@/admin/components/ui/input'
 import ImageUpload from '@/admin/views/ImageUpload.vue'
 import { Plus, Edit, Trash2, Award, Users } from 'lucide-vue-next'
 
-import { skills as initialSkills, mentors } from '@/admin/data/mockData'
 import type { Skill } from '@/admin/types/database'
 
-const isDeleteDialogOpen = ref(false)
-const skillToDelete = ref<Skill | null>(null)
-
-function handleDeleteConfirm() {
-  if (skillToDelete.value) {
-    skillsData.value = skillsData.value.filter(skill => skill.id !== skillToDelete.value!.id)
-    skillToDelete.value = null
-  }
-  isDeleteDialogOpen.value = false
-}
-
+// API URL
+const API_URL = 'https://itparkxorazm-laravel.test/api/skills'
 
 // State
-const skillsData = ref<Skill[]>([...initialSkills])
+const skillsData = ref<Skill[]>([])
 const isDialogOpen = ref(false)
 const editingSkill = ref<Skill | null>(null)
 const formData = ref<Partial<Skill>>({
@@ -39,67 +31,69 @@ const formData = ref<Partial<Skill>>({
   image_url: ''
 })
 
-// Mock skill-mentor relationships
-const mentorSkills = [
-  { id: 1, mentor_id: 1, skill_id: 1 },
-  { id: 2, mentor_id: 1, skill_id: 2 },
-  { id: 3, mentor_id: 2, skill_id: 1 },
-  { id: 4, mentor_id: 2, skill_id: 3 },
-  { id: 5, mentor_id: 3, skill_id: 4 }
-]
+// Delete confirm dialog
+const isDeleteDialogOpen = ref(false)
+const skillToDelete = ref<Skill | null>(null)
 
-// Utils
+// Fetch data from API
+async function fetchSkills() {
+  try {
+    const res = await axios.get(API_URL)
+    skillsData.value = res.data
+  } catch (error) {
+    console.error('API fetch error:', error)
+  }
+}
+
+onMounted(() => {
+  fetchSkills()
+})
+
+// Add / Update
+async function handleSubmit(e: Event) {
+  e.preventDefault()
+  try {
+    if (editingSkill.value) {
+      // Update
+      await axios.put(`${API_URL}/${editingSkill.value.id}`, formData.value)
+    } else {
+      // Create
+      await axios.post(API_URL, formData.value)
+    }
+    await fetchSkills()
+    isDialogOpen.value = false
+    editingSkill.value = null
+    resetForm()
+  } catch (error) {
+    console.error('Save error:', error)
+  }
+}
+
+// Delete confirm
+async function handleDeleteConfirm() {
+  if (!skillToDelete.value) return
+  try {
+    await axios.delete(`${API_URL}/${skillToDelete.value.id}`)
+    await fetchSkills()
+  } catch (error) {
+    console.error('Delete error:', error)
+  }
+  isDeleteDialogOpen.value = false
+  skillToDelete.value = null
+}
+
 function resetForm() {
   formData.value = { name: '', image_url: '' }
 }
 
 function handleEdit(skill: Skill) {
   editingSkill.value = skill
-  formData.value = { ...skill }
+  formData.value = { name: skill.name, image_url: skill.image_url }
   isDialogOpen.value = true
 }
 
-function handleDelete(id: number) {
-  skillsData.value = skillsData.value.filter(skill => skill.id !== id)
-}
-
-function handleSubmit(e: Event) {
-  e.preventDefault()
-  if (editingSkill.value) {
-    skillsData.value = skillsData.value.map(s =>
-      s.id === editingSkill.value!.id ? { ...s, ...formData.value } as Skill : s
-    )
-  } else {
-    const newSkill: Skill = {
-      id: Math.max(...skillsData.value.map(s => s.id)) + 1,
-      name: formData.value.name || '',
-      image_url: formData.value.image_url || ''
-    }
-    skillsData.value.push(newSkill)
-  }
-  isDialogOpen.value = false
-  editingSkill.value = null
-  resetForm()
-}
-
-function getMentorCount(skillId: number) {
-  return mentorSkills.filter(ms => ms.skill_id === skillId).length
-}
-
-function getMentorsWithSkill(skillId: number) {
-  const mentorIds = mentorSkills.filter(ms => ms.skill_id === skillId).map(ms => ms.mentor_id)
-  return mentors.filter(m => mentorIds.includes(m.id))
-}
-
-function getDefaultImageUrl(skillName: string) {
-  const skillImages: Record<string, string> = {
-    'JavaScript': 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=100&h=100&fit=crop',
-    'React': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=100&h=100&fit=crop',
-    'Node.js': 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=100&h=100&fit=crop',
-    'Flutter': 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=100&h=100&fit=crop',
-    'Python': 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=100&h=100&fit=crop'
-  }
-  return skillImages[skillName] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=100&h=100&fit=crop'
+function getMentorCount(skill: Skill) {
+  return skill.mentors ? skill.mentors.length : 0
 }
 </script>
 
@@ -115,15 +109,12 @@ function getDefaultImageUrl(skillName: string) {
       <Dialog :open="isDialogOpen" @update:open="val => isDialogOpen = val">
         <DialogTrigger as-child>
           <Button @click="() => { editingSkill = null; resetForm() }">
-            <Plus class="w-4 h-4 mr-2" />
-            Yangi Ko'nikma
+            <Plus class="w-4 h-4 mr-2" /> Yangi Ko'nikma
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {{ editingSkill ? "Ko'nikmani Tahrirlash" : "Yangi Ko'nikma Qo'shish" }}
-            </DialogTitle>
+            <DialogTitle>{{ editingSkill ? "Ko'nikmani Tahrirlash" : "Yangi Ko'nikma Qo'shish" }}</DialogTitle>
           </DialogHeader>
 
           <form @submit="handleSubmit" class="space-y-4">
@@ -132,18 +123,13 @@ function getDefaultImageUrl(skillName: string) {
               <Input v-model="formData.name" required placeholder="Ko'nikma nomini kiriting" />
             </div>
             <div class="space-y-2">
-  <label>Ko'nikma rasmi</label>
-  <ImageUpload
-    :value="formData.image_url"
-    @change="(url) => formData.image_url = url"
-    placeholder="Ko'nikma rasmini yuklang"
-  />
-  <!-- <p class="text-sm text-muted-foreground">Bo'sh qoldirilsa, default rasm avtomatik qo‘shiladi</p> -->
-</div>
+              <label>Ko'nikma rasmi</label>
+              <ImageUpload :value="formData.image_url" @change="url => formData.image_url = url" />
+            </div>
             <div v-if="formData.name" class="space-y-2">
               <label>Preview</label>
               <div class="flex items-center gap-3 p-3 border rounded-lg">
-                <img :src="formData.image_url || getDefaultImageUrl(formData.name)" class="w-12 h-12 rounded object-cover" />
+                <img :src="formData.image_url || '/no-image.png'" class="w-12 h-12 rounded object-cover" />
                 <span>{{ formData.name }}</span>
               </div>
             </div>
@@ -155,44 +141,6 @@ function getDefaultImageUrl(skillName: string) {
         </DialogContent>
       </Dialog>
     </div>
-
-    <!-- Skills Stats -->
-<div class="flex flex-wrap gap-4">
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
-      <div>
-        <p class="text-xs sm:text-sm text-muted-foreground">Jami Ko'nikmalar</p>
-        <p class="text-lg sm:text-2xl font-semibold">{{ skillsData.length }}</p>
-      </div>
-      <Award class="w-6 sm:w-8 h-6 sm:h-8 text-blue-500" />
-    </CardContent>
-  </Card>
-
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
-      <div>
-        <p class="text-xs sm:text-sm text-muted-foreground">Faol Ko'nikmalar</p>
-        <p class="text-lg sm:text-2xl font-semibold">
-          {{ skillsData.filter(s => getMentorCount(s.id) > 0).length }}
-        </p>
-      </div>
-      <Users class="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
-    </CardContent>
-  </Card>
-
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6 flex justify-between items-center">
-      <div>
-        <p class="text-xs sm:text-sm text-muted-foreground">Eng Mashhur</p>
-        <p class="text-lg sm:text-2xl font-semibold">
-          {{ skillsData.length ? skillsData.reduce((a, b) => getMentorCount(b.id) > getMentorCount(a.id) ? b : a).name.slice(0, 10) : '-' }}
-        </p>
-      </div>
-      <Award class="w-6 sm:w-8 h-6 sm:h-8 text-purple-500" />
-    </CardContent>
-  </Card>
-</div>
-
 
     <!-- Skills Table -->
     <Card>
@@ -212,10 +160,12 @@ function getDefaultImageUrl(skillName: string) {
           <TableBody>
             <TableRow v-for="skill in skillsData" :key="skill.id">
               <TableCell>
-                <img :src="skill.image_url || getDefaultImageUrl(skill.name)" class="w-10 h-10 rounded object-cover" />
+                <img :src="skill.full_image_url" class="w-10 h-10 rounded object-cover" />
               </TableCell>
               <TableCell>{{ skill.name }}</TableCell>
-              <TableCell><Badge variant="secondary">{{ getMentorCount(skill.id) }} mentor</Badge></TableCell>
+              <TableCell>
+                <Badge variant="secondary">{{ getMentorCount(skill) }} mentor</Badge>
+              </TableCell>
               <TableCell>
                 <div class="flex gap-2">
                   <Button size="sm" variant="outline" @click="handleEdit(skill)">
@@ -231,64 +181,21 @@ function getDefaultImageUrl(skillName: string) {
         </Table>
       </CardContent>
     </Card>
-
-    <!-- Skill Statistics -->
-    <Card>
-      <CardHeader><CardTitle>Ko'nikmalar Statistikasi</CardTitle></CardHeader>
-      <CardContent class="space-y-4">
-        <div v-for="skill in skillsData" :key="skill.id" class="space-y-2">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-              <img :src="skill.image_url || getDefaultImageUrl(skill.name)" class="w-6 h-6 rounded object-cover" />
-              <span class="text-sm">{{ skill.name }}</span>
-            </div>
-            <span class="text-sm text-muted-foreground">{{ getMentorCount(skill.id) }} mentor</span>
-          </div>
-          <div class="w-full bg-muted rounded-full h-2">
-            <div class="bg-primary h-2 rounded-full" :style="{ width: `${Math.min((getMentorCount(skill.id) / mentors.length) * 100, 100)}%` }"></div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Mentors by Skill -->
-    <Card>
-      <CardHeader><CardTitle>Ko'nikmalar bo'yicha Mentorlar</CardTitle></CardHeader>
-      <CardContent class="space-y-6">
-        <div v-for="skill in skillsData.filter(s => getMentorCount(s.id) > 0)" :key="skill.id" class="space-y-3">
-          <div class="flex items-center gap-3">
-            <img :src="skill.image_url || getDefaultImageUrl(skill.name)" class="w-8 h-8 rounded object-cover" />
-            <h4>{{ skill.name }}</h4>
-            <Badge variant="outline">{{ getMentorCount(skill.id) }} mentor</Badge>
-          </div>
-          <div class="ml-11 space-y-2">
-            <div v-for="mentor in getMentorsWithSkill(skill.id)" :key="mentor.id" class="flex items-center gap-3 p-2 bg-muted/50 rounded">
-              <img :src="mentor.image_url" class="w-8 h-8 rounded-full object-cover" />
-              <div>
-                <p class="text-sm">{{ mentor.first_name }} {{ mentor.last_name }}</p>
-                <p class="text-xs text-muted-foreground">
-                  {{ mentor.experience_years }} yil tajriba • {{ mentor.students }} talaba
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   </div>
-  <!-- <template> bo‘limining oxirida joylashtiring: -->
-<Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Ko'nikmani o'chirishni tasdiqlaysizmi?</DialogTitle>
-    </DialogHeader>
-    <p class="text-sm text-muted-foreground">
-      "{{ skillToDelete?.name }}" nomli ko‘nikma va unga bog‘langan mentorlar ro‘yxati o‘chiriladi.
-    </p>
-    <div class="flex justify-end gap-2 mt-4">
-      <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
-      <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
-    </div>
-  </DialogContent>
-</Dialog>
+
+  <!-- Delete Confirmation -->
+  <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Ko'nikmani o'chirishni tasdiqlaysizmi?</DialogTitle>
+      </DialogHeader>
+      <p class="text-sm text-muted-foreground">
+        "{{ skillToDelete?.name }}" nomli ko‘nikma o‘chiriladi.
+      </p>
+      <div class="flex justify-end gap-2 mt-4">
+        <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+        <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>

@@ -102,10 +102,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 import { Plus, Edit, Trash2 } from 'lucide-vue-next'
 
-// UI komponentlar
 import { Card, CardContent, CardHeader, CardTitle } from '@/admin/components/ui/card'
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
@@ -126,21 +126,62 @@ import {
 } from '@/admin/components/ui/table'
 import { Badge } from '@/admin/components/ui/badge'
 
-// Ma'lumotlar
-import { categories, courses } from '@/admin/data/mockData'
 import type { Category } from '@/admin/types/database'
 
-// State
-const categoriesData = ref<Category[]>([...categories])
+const API_BASE = 'https://itparkxorazm-laravel.test/api'
+const categoriesData = ref<Category[]>([])
+const courses = ref<any[]>([])
+
 const isDialogOpen = ref(false)
 const editingCategory = ref<Category | null>(null)
 const newCategoryName = ref('')
 
-// Confirm delete modal
 const isConfirmDialogOpen = ref(false)
 const categoryToDelete = ref<Category | null>(null)
 
-// Modalni ochish va tozalash
+// --- API’dan kategoriyalarni olish
+const fetchCategories = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/categories`)
+    categoriesData.value = res.data
+  } catch (err) {
+    console.error('Kategoriyalarni olishda xatolik:', err)
+  }
+}
+
+// --- Kurslarni olish
+const fetchCourses = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/courses`)
+    courses.value = res.data
+  } catch (err) {
+    console.error('Kurslarni olishda xatolik:', err)
+  }
+}
+
+// --- Kurslar sonini hisoblash (local array orqali)
+const getCourseCount = (categoryId: number) => {
+  return courses.value.filter(c => c.category_id === categoryId).length
+}
+
+// --- Yangi kategoriya qo‘shish yoki tahrirlash
+const handleSubmit = async () => {
+  const name = newCategoryName.value.trim()
+  if (!name) return
+
+  try {
+    if (editingCategory.value) {
+      await axios.put(`${API_BASE}/categories/${editingCategory.value.id}`, { name })
+    } else {
+      await axios.post(`${API_BASE}/categories`, { name })
+    }
+    await fetchCategories()
+    setDialogOpen(false)
+  } catch (err) {
+    console.error('Kategoriya saqlashda xatolik:', err)
+  }
+}
+
 const setDialogOpen = (value: boolean) => {
   isDialogOpen.value = value
   if (!value) {
@@ -155,22 +196,6 @@ const prepareAddCategory = () => {
   isDialogOpen.value = true
 }
 
-const handleSubmit = () => {
-  const name = newCategoryName.value.trim()
-  if (!name) return
-
-  if (editingCategory.value) {
-    categoriesData.value = categoriesData.value.map((cat) =>
-      cat.id === editingCategory.value!.id ? { ...cat, name } : cat
-    )
-  } else {
-    const newId = Math.max(...categoriesData.value.map((c) => c.id)) + 1
-    categoriesData.value.push({ id: newId, name })
-  }
-
-  setDialogOpen(false)
-}
-
 const handleEdit = (category: Category) => {
   editingCategory.value = { ...category }
   newCategoryName.value = category.name
@@ -182,17 +207,21 @@ const confirmDelete = (category: Category) => {
   isConfirmDialogOpen.value = true
 }
 
-const performDelete = () => {
+const performDelete = async () => {
   if (categoryToDelete.value) {
-    categoriesData.value = categoriesData.value.filter(
-      (cat) => cat.id !== categoryToDelete.value!.id
-    )
+    try {
+      await axios.delete(`${API_BASE}/categories/${categoryToDelete.value.id}`)
+      await fetchCategories()
+    } catch (err) {
+      console.error('O‘chirishda xatolik:', err)
+    }
   }
   isConfirmDialogOpen.value = false
   categoryToDelete.value = null
 }
 
-const getCourseCount = (categoryId: number) => {
-  return courses.filter((course) => course.category_id === categoryId).length
-}
+onMounted(async () => {
+  await fetchCategories()
+  await fetchCourses()
+})
 </script>

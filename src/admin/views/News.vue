@@ -152,125 +152,168 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
-import {Button} from '@/admin/components/ui/button';
-import {Input} from '@/admin/components/ui/input';
-import {Textarea} from '@/admin/components/ui/textarea';
-import {Badge} from '@/admin/components/ui/badge';
+import { Button } from '@/admin/components/ui/button'
+import { Input } from '@/admin/components/ui/input'
+import { Textarea } from '@/admin/components/ui/textarea'
+import { Badge } from '@/admin/components/ui/badge'
 import ImageUpload from '@/admin/views/ImageUpload.vue'
 
-import {Card, CardContent, CardHeader, CardTitle} from '@/admin/components/ui/card';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/admin/components/ui/table';
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/admin/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/admin/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/admin/components/ui/dialog'
 
-import { Plus, Edit, Trash2, Eye, Calendar, TrendingUp } from 'lucide-vue-next';
-import { news as initialNews } from '@/admin/data/mockData';
+import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next'
 
+// API bazaviy URL
+const API_URL = 'https://itparkxorazm-laravel.test/api/news'
+
+// State
+const newsData = ref([])
+const isDialogOpen = ref(false)
+const isViewDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 const newsToDelete = ref(null)
 
+const formData = ref({ heading: '', description: '', image_url: '' })
+const editingNews = ref(null)
+const viewingNews = ref(null)
+
+const defaultImage = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop'
+
+// API’dan ma’lumot olish
+async function fetchNews() {
+  try {
+    const res = await axios.get(API_URL)
+    newsData.value = res.data.map(item => ({
+      ...item,
+      image_url: item.full_image_url || item.image_url
+    }))
+  } catch (err) {
+    console.error('News fetch error:', err)
+  }
+}
+
+// Yangi xabar oynasini ochish
+function openNewDialog() {
+  editingNews.value = null
+  resetForm()
+  isDialogOpen.value = true
+}
+
+// Formani tozalash
+function resetForm() {
+  formData.value = { heading: '', description: '', image_url: '' }
+}
+
+// Qo‘shish / Tahrirlash
+async function handleSubmit() {
+  try {
+    if (editingNews.value) {
+      await axios.put(`${API_URL}/${editingNews.value.id}`, formData.value)
+    } else {
+      await axios.post(API_URL, formData.value)
+    }
+    await fetchNews()
+    isDialogOpen.value = false
+    resetForm()
+    editingNews.value = null
+  } catch (err) {
+    console.error('Save error:', err)
+  }
+}
+
+// Tahrirlashni boshlash
+function handleEdit(item) {
+  editingNews.value = item
+  formData.value = {
+    heading: item.heading,
+    description: item.description,
+    image_url: item.image_url
+  }
+  isDialogOpen.value = true
+}
+
+// Ko‘rish
+function handleView(item) {
+  viewingNews.value = item
+  isViewDialogOpen.value = true
+}
+
+// Ko‘rishdan tahrirlashga o‘tish
+function editFromView() {
+  handleEdit(viewingNews.value)
+  isViewDialogOpen.value = false
+}
+
+// O‘chirish tasdiqlash
 function confirmDelete(newsItem) {
   newsToDelete.value = newsItem
   isDeleteDialogOpen.value = true
 }
 
-function handleDeleteConfirmed() {
+// O‘chirish
+async function handleDeleteConfirmed() {
   if (newsToDelete.value) {
-    newsData.value = newsData.value.filter(item => item.id !== newsToDelete.value.id)
+    try {
+      await axios.delete(`${API_URL}/${newsToDelete.value.id}`)
+      await fetchNews()
+    } catch (err) {
+      console.error('Delete error:', err)
+    }
   }
   isDeleteDialogOpen.value = false
   newsToDelete.value = null
 }
 
-
-const newsData = ref([...initialNews]);
-const isDialogOpen = ref(false);
-const isViewDialogOpen = ref(false);
-// isViewDialogOpen = ref(false);
-
-const formData = ref({ heading: '', description: '', image_url: '' });
-const editingNews = ref(null);
-const viewingNews = ref(null);
-
-const defaultImage = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop';
-
-function openNewDialog() {
-  editingNews.value = null;
-  resetForm();
-  isDialogOpen.value = true;
-}
-
-function resetForm() {
-  formData.value = { heading: '', description: '', image_url: '' };
-}
-
-function handleSubmit() {
-  const currentDate = new Date().toISOString().split('T')[0];
-  if (editingNews.value) {
-    newsData.value = newsData.value.map(n => n.id === editingNews.value.id ? { ...n, ...formData.value, updated_at: currentDate } : n);
-  } else {
-    const newId = Math.max(...newsData.value.map(n => n.id)) + 1;
-    newsData.value.unshift({ id: newId, ...formData.value, created_at: currentDate, updated_at: currentDate });
-  }
-  isDialogOpen.value = false;
-  resetForm();
-  editingNews.value = null;
-}
-
-function handleEdit(item) {
-  editingNews.value = item;
-  formData.value = { heading: item.heading, description: item.description, image_url: item.image_url };
-  isDialogOpen.value = true;
-}
-
-function handleView(item) {
-  viewingNews.value = item;
-  isViewDialogOpen.value = true;
-}
-
-function editFromView() {
-  handleEdit(viewingNews.value);
-  isViewDialogOpen.value = false;
-}
-
-function handleDelete(id) {
-  newsData.value = newsData.value.filter(item => item.id !== id);
-}
-
+// Sana formatlash
 function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// Status belgilash
 function getStatus(dateStr) {
-  const daysDiff = (new Date() - new Date(dateStr)) / (1000 * 3600 * 24);
-  return daysDiff < 7 ? 'default' : 'secondary';
+  const daysDiff = (new Date() - new Date(dateStr)) / (1000 * 3600 * 24)
+  return daysDiff < 7 ? 'default' : 'secondary'
 }
 
 function getStatusLabel(dateStr) {
-  const daysDiff = Math.floor((new Date() - new Date(dateStr)) / (1000 * 3600 * 24));
-  if (daysDiff === 0) return 'Bugun';
-  if (daysDiff === 1) return 'Kecha';
-  if (daysDiff < 7) return `${daysDiff} kun oldin`;
-  return 'Eski';
+  const daysDiff = Math.floor((new Date() - new Date(dateStr)) / (1000 * 3600 * 24))
+  if (daysDiff === 0) return 'Bugun'
+  if (daysDiff === 1) return 'Kecha'
+  if (daysDiff < 7) return `${daysDiff} kun oldin`
+  return 'Eski'
 }
 
+// Computed
 const previewDescription = computed(() => {
-  return formData.value.description?.length > 100 ? formData.value.description.slice(0, 100) + '...' : formData.value.description;
-});
+  return formData.value.description?.length > 100
+    ? formData.value.description.slice(0, 100) + '...'
+    : formData.value.description
+})
 
 const recentNewsCount = computed(() => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  return newsData.value.filter(n => new Date(n.created_at) >= oneWeekAgo).length;
-});
+  const oneWeekAgo = new Date()
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+  return newsData.value.filter(n => new Date(n.created_at) >= oneWeekAgo).length
+})
 
 const latestDate = computed(() => {
-  return newsData.value.length > 0 ? formatDate(newsData.value[0].created_at) : '-';
-});
+  return newsData.value.length > 0 ? formatDate(newsData.value[0].created_at) : '-'
+})
 
 const averageLength = computed(() => {
-  if (!newsData.value.length) return 0;
-  return Math.round(newsData.value.reduce((sum, item) => sum + item.description.length, 0) / newsData.value.length);
-});
+  if (!newsData.value.length) return 0
+  return Math.round(
+    newsData.value.reduce((sum, item) => sum + item.description.length, 0) / newsData.value.length
+  )
+})
+
+// Component yuklanganda ma’lumot olish
+onMounted(() => {
+  fetchNews()
+})
 </script>

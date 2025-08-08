@@ -18,7 +18,9 @@
 
         <DialogContent class="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{{ editingCourse ? 'Kursni Tahrirlash' : 'Yangi Kurs Qo\'shish' }}</DialogTitle>
+            <DialogTitle>
+              {{ editingCourse ? "Kursni Tahrirlash" : "Yangi Kurs Qo'shish" }}
+            </DialogTitle>
           </DialogHeader>
 
           <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -29,7 +31,10 @@
               </div>
               <div class="space-y-2">
                 <label>Kategoriya</label>
-                <Select v-model="formData.category_id">
+                <Select
+                  :model-value="formData.category_id?.toString()"
+                  @update:model-value="val => formData.category_id = Number(val)"
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Kategoriyani tanlang" />
                   </SelectTrigger>
@@ -37,7 +42,7 @@
                     <SelectItem
                       v-for="category in categories"
                       :key="category.id"
-                      :value="category.id"
+                      :value="category.id.toString()"
                     >
                       {{ category.name }}
                     </SelectItem>
@@ -83,8 +88,8 @@
               <div class="space-y-2">
                 <label>Kurs Rasmi</label>
                 <ImageUpload
-                  :value="formData.image_url"
-                  @change="(url) => formData.image_url = url"
+                  :value="formData.image_url || ''"
+                  @change="url => formData.image_url = url"
                   placeholder="Kurs rasmini yuklang"
                 />
               </div>
@@ -95,7 +100,7 @@
                 Bekor qilish
               </Button>
               <Button type="submit">
-                {{ editingCourse ? 'Saqlash' : 'Qo\'shish' }}
+                {{ editingCourse ? "Saqlash" : "Qo'shish" }}
               </Button>
             </div>
           </form>
@@ -124,9 +129,9 @@
             <TableRow v-for="course in coursesData" :key="course.id">
               <TableCell>
                 <img
-                  :src="course.image_url"
+                  :src="getImageUrl(course.image_url)"
                   class="w-12 h-12 object-cover rounded-lg"
-                  :alt="course.name"
+                  :alt="course.name || 'Kurs rasmi'"
                 />
               </TableCell>
               <TableCell>
@@ -136,7 +141,9 @@
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline">{{ getCategoryName(course.category_id) }}</Badge>
+                <Badge variant="outline">
+                  {{ getCategoryName(course.category_id) }}
+                </Badge>
               </TableCell>
               <TableCell>{{ course.duration_month }} oy</TableCell>
               <TableCell>{{ formatPrice(course.cost) }}</TableCell>
@@ -159,14 +166,18 @@
       </CardContent>
     </Card>
 
-    <!-- Kurs tafsilotlarini ko‘rsatish -->
+    <!-- Kurs tafsilotlari -->
     <Dialog :open="isViewDialogOpen" @update:open="val => isViewDialogOpen = val">
       <DialogContent class="w-full max-w-2xl">
         <DialogHeader>
           <DialogTitle>Kurs Tafsilotlari</DialogTitle>
         </DialogHeader>
         <div v-if="viewingCourse" class="space-y-4">
-          <img :src="viewingCourse.image_url" class="w-full h-64 object-cover rounded-lg" alt="Kurs rasmi" />
+          <img
+            :src="getImageUrl(viewingCourse.image_url)"
+            class="w-full h-64 object-cover rounded-lg"
+            :alt="viewingCourse.name || 'Kurs rasmi'"
+          />
           <div>
             <h3 class="text-xl font-semibold">{{ viewingCourse.name }}</h3>
             <p class="text-muted-foreground">{{ viewingCourse.heading }}</p>
@@ -184,7 +195,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- O'chirishni tasdiqlash modali -->
+    <!-- O'chirish tasdiqlash -->
     <Dialog :open="isConfirmDeleteOpen" @update:open="isConfirmDeleteOpen = $event">
       <DialogContent class="w-full max-w-md">
         <DialogHeader>
@@ -192,7 +203,7 @@
         </DialogHeader>
         <div class="space-y-4">
           <p>Ushbu kursni o‘chirishni xohlaysizmi?</p>
-          <p><strong>{{ courseToDelete?.name }}</strong></p>
+          <p><strong>{{ courseToDelete ? courseToDelete.name : '' }}</strong></p>
           <div class="flex justify-end gap-2">
             <Button variant="outline" @click="isConfirmDeleteOpen = false">Yo‘q</Button>
             <Button variant="destructive" @click="performDelete">Ha</Button>
@@ -203,8 +214,10 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 import { Button } from '@/admin/components/ui/button'
@@ -237,16 +250,16 @@ import {
   SelectValue,
 } from '@/admin/components/ui/select'
 
-import { courses as initialCourses, categories } from '@/admin/data/mockData'
-import type { Course } from '@/admin/types/database'
+import type { Course, Category } from '@/admin/types/database'
 
-const coursesData = ref<Course[]>([...initialCourses])
+const coursesData = ref<Course[]>([])
+const categories = ref<Category[]>([])
+
 const isDialogOpen = ref(false)
 const editingCourse = ref<Course | null>(null)
 const isViewDialogOpen = ref(false)
 const viewingCourse = ref<Course | null>(null)
 
-// Tasdiqlash modali uchun
 const isConfirmDeleteOpen = ref(false)
 const courseToDelete = ref<Course | null>(null)
 
@@ -259,6 +272,41 @@ const formData = ref<Partial<Course>>({
   cost: 0,
   image_url: '',
 })
+
+const API_URL = 'https://itparkxorazm-laravel.test/api/courses'
+const BASE_URL = 'https://itparkxorazm-laravel.test'
+
+const fetchCourses = async () => {
+  try {
+    const res = await axios.get(API_URL)
+    coursesData.value = res.data
+  } catch (err) {
+    console.error('Kurslarni olishda xatolik:', err)
+  }
+}
+
+const fetchCategories = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/categories`)
+    categories.value = res.data
+  } catch (err) {
+    console.error('Kategoriyalarni olishda xatolik:', err)
+  }
+}
+
+const handleSubmit = async () => {
+  try {
+    if (editingCourse.value) {
+      await axios.put(`${API_URL}/${editingCourse.value.id}`, formData.value)
+    } else {
+      await axios.post(API_URL, formData.value)
+    }
+    await fetchCourses()
+    setDialogOpen(false)
+  } catch (err) {
+    console.error('Saqlashda xatolik:', err)
+  }
+}
 
 const prepareAddCourse = () => {
   editingCourse.value = null
@@ -275,7 +323,7 @@ const resetForm = () => {
     duration_month: 1,
     cost: 0,
     image_url: '',
-  }
+  } as Partial<Course>
 }
 
 const setDialogOpen = (val: boolean) => {
@@ -284,18 +332,6 @@ const setDialogOpen = (val: boolean) => {
     editingCourse.value = null
     resetForm()
   }
-}
-
-const handleSubmit = () => {
-  if (editingCourse.value) {
-    coursesData.value = coursesData.value.map((c) =>
-      c.id === editingCourse.value!.id ? { ...c, ...formData.value } as Course : c
-    )
-  } else {
-    const newId = Math.max(...coursesData.value.map((c) => c.id)) + 1
-    coursesData.value.push({ id: newId, ...formData.value } as Course)
-  }
-  setDialogOpen(false)
 }
 
 const handleEdit = (course: Course) => {
@@ -314,19 +350,36 @@ const confirmDelete = (course: Course) => {
   isConfirmDeleteOpen.value = true
 }
 
-const performDelete = () => {
-  if (courseToDelete.value) {
-    coursesData.value = coursesData.value.filter((c) => c.id !== courseToDelete.value!.id)
+const performDelete = async () => {
+  try {
+    if (courseToDelete.value) {
+      await axios.delete(`${API_URL}/${courseToDelete.value.id}`)
+      await fetchCourses()
+    }
+    isConfirmDeleteOpen.value = false
+    courseToDelete.value = null
+  } catch (err) {
+    console.error('O‘chirishda xatolik:', err)
   }
-  isConfirmDeleteOpen.value = false
-  courseToDelete.value = null
 }
 
-const getCategoryName = (categoryId: number) => {
-  return categories.find((cat) => cat.id === categoryId)?.name || 'Noma\'lum'
+const getImageUrl = (url?: string) => {
+  if (!url) return '/placeholder.jpg'
+  if (url.startsWith('http')) return url
+  return `${BASE_URL}/${url.replace(/^\/+/, '')}`
+}
+
+const getCategoryName = (category_id: number) => {
+  const cat = categories.value.find(c => c.id === category_id)
+  return cat ? cat.name : 'Noma’lum'
 }
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('uz-UZ').format(price) + " so'm"
 }
+
+onMounted(() => {
+  fetchCourses()
+  fetchCategories()
+})
 </script>
