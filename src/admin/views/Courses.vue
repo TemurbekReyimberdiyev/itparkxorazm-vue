@@ -32,9 +32,10 @@
               <div class="space-y-2">
                 <label>Kategoriya</label>
                 <Select
-                  :model-value="formData.category_id?.toString()"
-                  @update:model-value="val => formData.category_id = Number(val)"
-                >
+  required
+  :model-value="formData.category_id?.toString()"
+  @update:model-value="val => formData.category_id = Number(val)"
+>
                   <SelectTrigger>
                     <SelectValue placeholder="Kategoriyani tanlang" />
                   </SelectTrigger>
@@ -89,7 +90,7 @@
                 <label>Kurs Rasmi</label>
                 <ImageUpload
                   :value="formData.image_url || ''"
-                  @change="url => formData.image_url = url"
+                  @change="handleImageChange"
                   placeholder="Kurs rasmini yuklang"
                 />
               </div>
@@ -214,7 +215,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
@@ -267,11 +267,11 @@ const formData = ref<Partial<Course>>({
   name: '',
   heading: '',
   description: '',
-  category_id: 1,
-  duration_month: 1,
-  cost: 0,
-  image_url: '',
+  category_id: null,
+  duration_month: null,
+  cost: null,
 })
+const uploadedFile = ref<File | null>(null) // 📌 yangi qo'shildi
 
 const API_URL = 'https://itparkxorazm-laravel.test/api/courses'
 const BASE_URL = 'https://itparkxorazm-laravel.test'
@@ -294,19 +294,48 @@ const fetchCategories = async () => {
   }
 }
 
+const handleImageChange = (fileOrUrl: File | string) => {
+  if (fileOrUrl instanceof File) {
+    uploadedFile.value = fileOrUrl
+  } else {
+    formData.value.image_url = fileOrUrl
+  }
+}
+
 const handleSubmit = async () => {
   try {
-    if (editingCourse.value) {
-      await axios.put(`${API_URL}/${editingCourse.value.id}`, formData.value)
-    } else {
-      await axios.post(API_URL, formData.value)
+    const data = new FormData()
+    data.append('name', formData.value.name || '')
+    data.append('heading', formData.value.heading || '')
+    data.append('description', formData.value.description || '')
+    data.append('category_id', String(formData.value.category_id || ''))
+    data.append('duration_month', String(formData.value.duration_month || ''))
+    data.append('cost', String(formData.value.cost || ''))
+
+    if (uploadedFile.value) {
+      data.append('image', uploadedFile.value) // backend kutgan nom bilan
     }
+
+    if (editingCourse.value) {
+      await axios.post(`${API_URL}/${editingCourse.value.id}?_method=PUT`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    } else {
+      await axios.post(API_URL, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+
     await fetchCourses()
     setDialogOpen(false)
   } catch (err) {
     console.error('Saqlashda xatolik:', err)
+    if (err.response?.data?.errors) {
+      console.table(err.response.data.errors)
+    }
   }
 }
+
 
 const prepareAddCourse = () => {
   editingCourse.value = null
@@ -323,7 +352,8 @@ const resetForm = () => {
     duration_month: 1,
     cost: 0,
     image_url: '',
-  } as Partial<Course>
+  }
+  uploadedFile.value = null
 }
 
 const setDialogOpen = (val: boolean) => {
@@ -337,6 +367,7 @@ const setDialogOpen = (val: boolean) => {
 const handleEdit = (course: Course) => {
   editingCourse.value = { ...course }
   formData.value = { ...course }
+  uploadedFile.value = null
   isDialogOpen.value = true
 }
 

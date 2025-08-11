@@ -63,31 +63,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { Button } from '@/admin/components/ui/button'
 import { LucideUpload, LucideX, LucideImage } from 'lucide-vue-next'
 
 interface Props {
-  value?: string
+  value?: string | File
   placeholder?: string
   className?: string
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  (e: 'update:value', url: string): void
+  (e: 'update:value', file: File | null): void
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
-const previewUrl = ref<string | null>(props.value || null)
+const previewUrl = ref<string | null>(null)
+const createdBlobUrl = ref<string | null>(null)
+
+// Blob URLni tozalash
+function revokeBlobUrl() {
+  if (createdBlobUrl.value) {
+    URL.revokeObjectURL(createdBlobUrl.value)
+    createdBlobUrl.value = null
+  }
+}
 
 watch(
   () => props.value,
   (newVal) => {
-    previewUrl.value = newVal || null
-  }
+    revokeBlobUrl()
+    if (typeof newVal === 'string') {
+      previewUrl.value = newVal || null
+    } else if (newVal instanceof File) {
+      const blobUrl = URL.createObjectURL(newVal)
+      previewUrl.value = blobUrl
+      createdBlobUrl.value = blobUrl
+    } else {
+      previewUrl.value = null
+    }
+  },
+  { immediate: true }
 )
+
+onBeforeUnmount(() => {
+  revokeBlobUrl()
+})
 
 const triggerFileSelect = () => {
   fileInput.value?.click()
@@ -96,41 +119,26 @@ const triggerFileSelect = () => {
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
-
   if (!file) return
 
-  // Turini tekshirish
   if (!file.type.startsWith('image/')) {
     alert('Iltimos, rasm fayli tanlang')
     return
   }
-
-  // Hajmini tekshirish
   if (file.size > 5 * 1024 * 1024) {
     alert("Rasm hajmi 5MB dan kichik bo'lishi kerak")
     return
   }
 
   isUploading.value = true
-
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const result = e.target?.result as string
-    previewUrl.value = result
-
-    // Simulyatsiya qilingan yuklash
-    setTimeout(() => {
-      emit('update:value', result)
-      isUploading.value = false
-    }, 1000)
-  }
-
-  reader.readAsDataURL(file)
+  emit('update:value', file)
+  isUploading.value = false
 }
 
 const handleRemove = () => {
+  revokeBlobUrl()
   previewUrl.value = null
-  emit('update:value', '')
+  emit('update:value', null)
   if (fileInput.value) {
     fileInput.value.value = ''
   }

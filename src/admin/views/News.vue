@@ -29,22 +29,21 @@
       <div class="space-y-2">
         <label>Yangilik rasmi</label>
         <ImageUpload
-    :value="formData.image_url"
-    @change="(url) => formData.image_url = url"
-    placeholder="Yangilik rasmini yuklang"
-  />
+  v-model="formData.image"
+  placeholder="Yangilik rasmini yuklang"
+/>
         <!-- <p class="text-sm text-muted-foreground">Bo'sh qoldiring, default rasm ishlatiladi</p> -->
       </div>
       <div v-if="formData.heading || formData.description" class="space-y-2">
-        <label>Preview</label>
-        <div class="border rounded-lg p-4 space-y-3">
-          <img :src="formData.image_url || defaultImage" alt="Preview" class="w-full max-h-48 rounded object-cover" />
-          <div>
-            <h4>{{ formData.heading || 'Sarlavha' }}</h4>
-            <p class="text-sm text-muted-foreground mt-2">{{ previewDescription }}</p>
-          </div>
-        </div>
-      </div>
+  <label>Preview</label>
+  <div class="border rounded-lg p-4 space-y-3">
+    <img :src="previewImage" alt="Preview" class="w-full max-h-48 rounded object-cover" />
+    <div>
+      <h4>{{ formData.heading || 'Sarlavha' }}</h4>
+      <p class="text-sm text-muted-foreground mt-2">{{ previewDescription }}</p>
+    </div>
+  </div>
+</div>
       <div class="flex justify-end gap-2">
         <Button variant="outline" type="button" @click="isDialogOpen = false">Bekor qilish</Button>
         <Button type="submit">{{ editingNews ? 'Saqlash' : 'Qo\'shish' }}</Button>
@@ -152,20 +151,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue' // <<< `watch` import qilindi
 import axios from 'axios'
 
+// ... (barcha importlar o'zgarishsiz qoladi)
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
 import { Badge } from '@/admin/components/ui/badge'
 import ImageUpload from '@/admin/views/ImageUpload.vue'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/admin/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/admin/components/ui/dialog'
-
 import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next'
+
 
 // API bazaviy URL
 const API_URL = 'https://itparkxorazm-laravel.test/api/news'
@@ -177,84 +176,149 @@ const isViewDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 const newsToDelete = ref(null)
 
-const formData = ref({ heading: '', description: '', image_url: '' })
+const initialFormData = {
+  heading: '',
+  description: '',
+  image: null,
+}
+const formData = ref({ ...initialFormData })
 const editingNews = ref(null)
 const viewingNews = ref(null)
-
 const defaultImage = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop'
 
-// API’dan ma’lumot olish
+// =======================================================================
+// <<< MUAMMONING ASOSIY YECHIMI SHU YERDA
+// =======================================================================
+
+// 1. Preview uchun alohida `ref` yaratamiz
+const previewInFormUrl = ref(defaultImage)
+// 2. Xotirada yaratilgan vaqtinchalik blob URLni saqlab turish uchun `ref`
+const createdBlobUrl = ref(null)
+
+// 3. Eskirgan blob URLni xotiradan tozalovchi funksiya
+function revokeBlobUrl() {
+    if (createdBlobUrl.value) {
+        URL.revokeObjectURL(createdBlobUrl.value)
+        createdBlobUrl.value = null
+    }
+}
+
+// 4. `formData.image` o'zgarganda preview rasmini yangilovchi `watch`
+watch(() => formData.value.image, (newImage) => {
+    revokeBlobUrl() // Har o'zgarishda avvalgi blobni xotiradan o'chiramiz
+
+    if (newImage instanceof File) {
+        // Agar yangi fayl tanlansa, unga yangi blob URL yaratamiz
+        const newBlobUrl = URL.createObjectURL(newImage)
+        previewInFormUrl.value = newBlobUrl
+        createdBlobUrl.value = newBlobUrl // O'chirish uchun saqlab qo'yamiz
+    } else if (typeof newImage === 'string' && newImage) {
+        // Agar bu serverdan kelgan URL bo'lsa (tahrirlashda), shuni ko'rsatamiz
+        previewInFormUrl.value = newImage
+    } else {
+        // Agar rasm yo'q bo'lsa (o'chirilgan bo'lsa), default rasmni ko'rsatamiz
+        previewInFormUrl.value = defaultImage
+    }
+})
+
+// 5. Dialog yopilganda ham resurslarni tozalaymiz
+watch(isDialogOpen, (isOpen) => {
+    if (!isOpen) {
+        revokeBlobUrl()
+    }
+})
+
+// =======================================================================
+// YECHIM TUGADI
+// =======================================================================
+
+
+// Qolgan barcha funksiyalar (fetchNews, openNewDialog, ...) o'zgarishsiz qoladi,
+// chunki ular endi to'g'ri holat (`formData.image`) bilan ishlayapti.
+
 async function fetchNews() {
   try {
     const res = await axios.get(API_URL)
     newsData.value = res.data.map(item => ({
       ...item,
       image_url: item.full_image_url || item.image_url
-    }))
+    })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   } catch (err) {
     console.error('News fetch error:', err)
   }
 }
 
-// Yangi xabar oynasini ochish
 function openNewDialog() {
   editingNews.value = null
   resetForm()
   isDialogOpen.value = true
 }
 
-// Formani tozalash
 function resetForm() {
-  formData.value = { heading: '', description: '', image_url: '' }
+  formData.value = { ...initialFormData }
 }
 
-// Qo‘shish / Tahrirlash
 async function handleSubmit() {
   try {
-    if (editingNews.value) {
-      await axios.put(`${API_URL}/${editingNews.value.id}`, formData.value)
-    } else {
-      await axios.post(API_URL, formData.value)
+    const data = new FormData()
+    data.append('heading', formData.value.heading)
+    data.append('description', formData.value.description)
+
+    if (formData.value.image instanceof File) {
+      data.append('image', formData.value.image)
     }
+
+    if (editingNews.value) {
+      data.append('_method', 'PUT')
+      await axios.post(`${API_URL}/${editingNews.value.id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    } else {
+      await axios.post(API_URL, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
+
     await fetchNews()
     isDialogOpen.value = false
+  } catch (err) {
+    console.error('Save error:', err.response ? err.response.data : err)
+  } finally {
     resetForm()
     editingNews.value = null
-  } catch (err) {
-    console.error('Save error:', err)
   }
 }
 
-// Tahrirlashni boshlash
+
 function handleEdit(item) {
   editingNews.value = item
   formData.value = {
     heading: item.heading,
     description: item.description,
-    image_url: item.image_url
+    image: item.image_url, // Mavjud rasm URL'ini `image`ga o'rnatamiz
   }
   isDialogOpen.value = true
 }
 
-// Ko‘rish
+// ... Qolgan barcha funksiyalar va computed xususiyatlar o'zgarishsiz qoladi ...
+
 function handleView(item) {
   viewingNews.value = item
   isViewDialogOpen.value = true
 }
 
-// Ko‘rishdan tahrirlashga o‘tish
 function editFromView() {
-  handleEdit(viewingNews.value)
-  isViewDialogOpen.value = false
+  if (viewingNews.value) {
+    handleEdit(viewingNews.value)
+    isViewDialogOpen.value = false
+  }
 }
 
-// O‘chirish tasdiqlash
 function confirmDelete(newsItem) {
   newsToDelete.value = newsItem
   isDeleteDialogOpen.value = true
 }
 
-// O‘chirish
 async function handleDeleteConfirmed() {
   if (newsToDelete.value) {
     try {
@@ -262,19 +326,18 @@ async function handleDeleteConfirmed() {
       await fetchNews()
     } catch (err) {
       console.error('Delete error:', err)
+    } finally {
+      isDeleteDialogOpen.value = false
+      newsToDelete.value = null
     }
   }
-  isDeleteDialogOpen.value = false
-  newsToDelete.value = null
 }
 
-// Sana formatlash
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-// Status belgilash
 function getStatus(dateStr) {
   const daysDiff = (new Date() - new Date(dateStr)) / (1000 * 3600 * 24)
   return daysDiff < 7 ? 'default' : 'secondary'
@@ -282,13 +345,14 @@ function getStatus(dateStr) {
 
 function getStatusLabel(dateStr) {
   const daysDiff = Math.floor((new Date() - new Date(dateStr)) / (1000 * 3600 * 24))
+  if (daysDiff < 0) return "Kelajakda";
   if (daysDiff === 0) return 'Bugun'
   if (daysDiff === 1) return 'Kecha'
   if (daysDiff < 7) return `${daysDiff} kun oldin`
   return 'Eski'
 }
 
-// Computed
+// `previewImage` computed endi kerak emas, uning o'rniga `previewInFormUrl` ishlatiladi
 const previewDescription = computed(() => {
   return formData.value.description?.length > 100
     ? formData.value.description.slice(0, 100) + '...'
@@ -312,7 +376,6 @@ const averageLength = computed(() => {
   )
 })
 
-// Component yuklanganda ma’lumot olish
 onMounted(() => {
   fetchNews()
 })
