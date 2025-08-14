@@ -202,32 +202,46 @@ const closeModal = () => {
 }
 
 // API dan ma’lumot olish
+// API dan ma’lumot olish
 const fetchCourses = async () => {
   try {
     const res = await fetch('https://itparkxorazm-laravel.test/api/courses')
     const data = await res.json()
 
-    // Ma'lumotlarni formatlash
-    courses.value = data.map(c => ({
-      id: c.id,
-      title: c.name,
-      description: c.heading,
-      duration: c.duration || '',
-      category: c.category?.name || '',
-      image: c.image_url?.startsWith('http') ? c.image_url : `https://itparkxorazm-laravel.test/storage/${c.image_url}`,
-      mentorName: c.mentor?.name || '',
-      mentorImage: c.mentor?.image_url?.startsWith('http') ? c.mentor.image_url : `https://itparkxorazm-laravel.test/storage/${c.mentor?.image_url}`,
-      experience: c.mentor?.experience || '',
-      price: c.price || ''
-    }))
+    courses.value = data.map(c => {
+      const firstMentor = c.mentors?.[0] || {}
 
-    // Kategoriyalar
+      return {
+        id: c.id,
+        title: c.name,
+        description: c.heading,
+        duration: c.duration || '',
+        category: c.category?.name || '',
+        image: c.image_url?.startsWith('http')
+          ? c.image_url
+          : `https://itparkxorazm-laravel.test/storage/${c.image_url}`,
+        mentorName: firstMentor.first_name && firstMentor.last_name
+          ? `${firstMentor.first_name} ${firstMentor.last_name}`
+          : '',
+        mentorImage: firstMentor.image_url?.startsWith('http')
+          ? firstMentor.image_url
+          : firstMentor.image_url
+            ? `https://itparkxorazm-laravel.test/storage/${firstMentor.image_url}`
+            : '',
+        experience: firstMentor.experience_years
+          ? `${firstMentor.experience_years} yil`
+          : '',
+        price: c.price || ''
+      }
+    })
+
     filters.value = [...new Set(courses.value.map(c => c.category))]
     selectedFilter.value = filters.value[0] || ''
   } catch (err) {
     console.error('API error:', err)
   }
 }
+
 
 onMounted(fetchCourses)
 </script>

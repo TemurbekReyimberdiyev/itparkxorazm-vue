@@ -1,15 +1,13 @@
 <template>
-  <div :class="['space-y-2', props.className]">
-    <!-- Fayl input -->
+  <div :class="`space-y-2 ${className}`">
     <input
       ref="fileInput"
       type="file"
       accept="image/*"
       class="hidden"
-      @change.stop.prevent="handleFileSelect"
+      @change="onFileChange"
     />
 
-    <!-- Agar rasm bor bo'lsa -->
     <div v-if="previewUrl" class="relative group">
       <div class="relative w-full h-32 border border-border rounded-lg overflow-hidden bg-muted">
         <img :src="previewUrl" alt="Preview" class="w-full h-full object-cover" />
@@ -18,129 +16,150 @@
           class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
         >
           <Button
+            type="button"
             variant="destructive"
             size="sm"
             class="absolute top-2 right-2"
-            type="button"
-            @click.stop.prevent="handleRemove"
+            @click="handleRemove"
           >
-            <LucideX class="h-4 w-4" />
+            <X class="h-4 w-4" />
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            type="button"
-            :disabled="isUploading"
-            @click.stop.prevent="triggerFileSelect"
-          >
-            <LucideUpload class="h-4 w-4 mr-2" />
-            O'zgartirish
-          </Button>
+
+          <div class="flex gap-2">
+            <Button type="button" variant="secondary" size="sm" @click="triggerFile" :disabled="isUploading">
+              <Upload class="h-4 w-4 mr-2" />
+              O'zgartirish
+            </Button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Agar rasm yo'q bo'lsa -->
-    <Button
-      v-else
-      variant="outline"
-      type="button"
-      class="w-full h-32 border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2"
-      :disabled="isUploading"
-      @click.stop.prevent="triggerFileSelect"
-    >
-      <template v-if="isUploading">
-        <div class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
-        <span>Yuklanmoqda...</span>
-      </template>
-      <template v-else>
-        <LucideImage class="h-8 w-8 text-muted-foreground" />
-        <span>{{ props.placeholder }}</span>
-        <span class="text-xs text-muted-foreground">PNG, JPG, JPEG (max 5MB)</span>
-      </template>
-    </Button>
+    <div v-else>
+      <Button
+        type="button"
+        variant="outline"
+        @click="triggerFile"
+        :disabled="isUploading"
+        class="w-full h-32 border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2"
+      >
+        <template v-if="isUploading">
+          <div class="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
+          <span>Yuklanmoqda...</span>
+        </template>
+        <template v-else>
+          <Image class="h-8 w-8 text-muted-foreground" />
+          <span>{{ placeholder }}</span>
+          <span class="text-xs text-muted-foreground">PNG, JPG, JPEG (max 5MB)</span>
+        </template>
+      </Button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
+import type { PropType } from 'vue'
 import { Button } from '@/admin/components/ui/button'
-import { LucideUpload, LucideX, LucideImage } from 'lucide-vue-next'
+import { Upload, X, Image } from 'lucide-vue-next'
 
-interface Props {
-  value?: string | File
-  placeholder?: string
-  className?: string
-}
+const props = defineProps({
+  value: {
+    type: String as PropType<string | undefined>,
+    default: undefined,
+  },
+  placeholder: {
+    type: String as PropType<string>,
+    default: 'Rasm yuklash',
+  },
+  className: {
+    type: String as PropType<string>,
+    default: '',
+  },
+})
 
-const props = defineProps<Props>()
+// emits: change => File | string (url) | ''
 const emit = defineEmits<{
-  (e: 'update:value', file: File | null): void
+  (e: 'change', payload: File | string | null): void
+  (e: 'update:value', payload: string): void
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
-const previewUrl = ref<string | null>(null)
-const createdBlobUrl = ref<string | null>(null)
+const previewUrl = ref<string | null>(props.value || null)
+let objectUrlToRevoke: string | null = null
 
-// Blob URLni tozalash
-function revokeBlobUrl() {
-  if (createdBlobUrl.value) {
-    URL.revokeObjectURL(createdBlobUrl.value)
-    createdBlobUrl.value = null
-  }
-}
-
+// Keep previewUrl in sync if parent changes `value` (existing image url)
 watch(
   () => props.value,
   (newVal) => {
-    revokeBlobUrl()
-    if (typeof newVal === 'string') {
-      previewUrl.value = newVal || null
-    } else if (newVal instanceof File) {
-      const blobUrl = URL.createObjectURL(newVal)
-      previewUrl.value = blobUrl
-      createdBlobUrl.value = blobUrl
-    } else {
+    if (!newVal) {
       previewUrl.value = null
+    } else {
+      previewUrl.value = newVal
     }
-  },
-  { immediate: true }
+  }
 )
 
-onBeforeUnmount(() => {
-  revokeBlobUrl()
+onUnmounted(() => {
+  if (objectUrlToRevoke) URL.revokeObjectURL(objectUrlToRevoke)
 })
 
-const triggerFileSelect = () => {
+const triggerFile = () => {
   fileInput.value?.click()
 }
 
-const handleFileSelect = (event: Event) => {
-  const target = event.target as HTMLInputElement
+const onFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
 
+  // Validate type
   if (!file.type.startsWith('image/')) {
+    // you can replace alert with a nicer Toast from shadcn
     alert('Iltimos, rasm fayli tanlang')
+    target.value = ''
     return
   }
-  if (file.size > 5 * 1024 * 1024) {
+
+  // Validate size (5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
     alert("Rasm hajmi 5MB dan kichik bo'lishi kerak")
+    target.value = ''
     return
   }
 
   isUploading.value = true
-  emit('update:value', file)
-  isUploading.value = false
+
+  // Create object URL for fast preview
+  if (objectUrlToRevoke) {
+    URL.revokeObjectURL(objectUrlToRevoke)
+    objectUrlToRevoke = null
+  }
+  const url = URL.createObjectURL(file)
+  objectUrlToRevoke = url
+  previewUrl.value = url
+
+  // Emit File to parent so it can append to FormData
+  // Also emit update:value with preview URL (optional)
+  emit('change', file)
+  emit('update:value', url)
+
+  // Simulate upload delay if you want to show spinner; remove if not needed
+  setTimeout(() => {
+    isUploading.value = false
+  }, 700)
 }
 
 const handleRemove = () => {
-  revokeBlobUrl()
-  previewUrl.value = null
-  emit('update:value', null)
-  if (fileInput.value) {
-    fileInput.value.value = ''
+  if (objectUrlToRevoke) {
+    URL.revokeObjectURL(objectUrlToRevoke)
+    objectUrlToRevoke = null
   }
+  previewUrl.value = null
+  if (fileInput.value) fileInput.value.value = ''
+  emit('change', null)
+  emit('update:value', '')
 }
 </script>

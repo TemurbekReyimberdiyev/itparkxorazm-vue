@@ -153,8 +153,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue' // <<< `watch` import qilindi
 import axios from 'axios'
-
-// ... (barcha importlar o'zgarishsiz qoladi)
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
@@ -186,9 +184,6 @@ const editingNews = ref(null)
 const viewingNews = ref(null)
 const defaultImage = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop'
 
-// =======================================================================
-// <<< MUAMMONING ASOSIY YECHIMI SHU YERDA
-// =======================================================================
 
 // 1. Preview uchun alohida `ref` yaratamiz
 const previewInFormUrl = ref(defaultImage)
@@ -228,13 +223,6 @@ watch(isDialogOpen, (isOpen) => {
     }
 })
 
-// =======================================================================
-// YECHIM TUGADI
-// =======================================================================
-
-
-// Qolgan barcha funksiyalar (fetchNews, openNewDialog, ...) o'zgarishsiz qoladi,
-// chunki ular endi to'g'ri holat (`formData.image`) bilan ishlayapti.
 
 async function fetchNews() {
   try {

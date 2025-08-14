@@ -89,7 +89,7 @@
               <div class="space-y-2">
                 <label>Kurs Rasmi</label>
                 <ImageUpload
-                  :value="formData.image_url || ''"
+                  :value="previewUrl"
                   @change="handleImageChange"
                   placeholder="Kurs rasmini yuklang"
                 />
@@ -294,30 +294,42 @@ const fetchCategories = async () => {
   }
 }
 
-const handleImageChange = (fileOrUrl: File | string) => {
+const previewUrl = ref<string>('')
+
+const handleImageChange = (fileOrUrl: File | string | null) => {
   if (fileOrUrl instanceof File) {
     uploadedFile.value = fileOrUrl
+    previewUrl.value = URL.createObjectURL(fileOrUrl)
+  } else if (typeof fileOrUrl === 'string') {
+    uploadedFile.value = null
+    previewUrl.value = getImageUrl(fileOrUrl)
   } else {
-    formData.value.image_url = fileOrUrl
+    uploadedFile.value = null
+    previewUrl.value = ''
   }
 }
+
+
 
 const handleSubmit = async () => {
   try {
     const data = new FormData()
+
+    // Laravel kutgan aniq nomlar
     data.append('name', formData.value.name || '')
     data.append('heading', formData.value.heading || '')
     data.append('description', formData.value.description || '')
-    data.append('category_id', String(formData.value.category_id || ''))
-    data.append('duration_month', String(formData.value.duration_month || ''))
-    data.append('cost', String(formData.value.cost || ''))
+    data.append('category_id', formData.value.category_id ? String(formData.value.category_id) : '')
+    data.append('duration_month', formData.value.duration_month ? String(formData.value.duration_month) : '')
+    data.append('cost', formData.value.cost ? String(formData.value.cost) : '')
 
     if (uploadedFile.value) {
-      data.append('image', uploadedFile.value) // backend kutgan nom bilan
+      data.append('image', uploadedFile.value)
     }
 
     if (editingCourse.value) {
-      await axios.post(`${API_URL}/${editingCourse.value.id}?_method=PUT`, data, {
+      data.append('_method', 'PUT') // Laravel PUT patch uchun
+      await axios.post(`${API_URL}/${editingCourse.value.id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     } else {
