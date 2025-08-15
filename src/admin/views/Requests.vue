@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { Eye, Mail, Phone, Trash2, CheckCircle } from 'lucide-vue-next'
 import {
   Card,
@@ -24,27 +25,41 @@ import {
 } from '@/admin/components/ui/dialog'
 import { Button } from '@/admin/components/ui/button'
 
-import { requests as mockRequests, courses } from '@/admin/data/mockData'
 import type { Request } from '@/admin/types/database'
 
+const API_URL = 'https://itparkxorazm-laravel.test/api/requests'
 
 const isDeleteDialogOpen = ref(false)
 const requestToDelete = ref<Request | null>(null)
 
-const handleDeleteConfirm = () => {
+const requestsData = ref<Request[]>([])
+const selectedRequest = ref<Request | null>(null)
+const isDetailDialogOpen = ref(false)
+const loading = ref(false)
+
+const fetchRequests = async () => {
+  loading.value = true
+  try {
+    const res = await axios.get(API_URL)
+    requestsData.value = res.data
+  } catch (error) {
+    console.error("So'rovlarni olishda xatolik:", error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleDeleteConfirm = async () => {
   if (requestToDelete.value) {
-    requestsData.value = requestsData.value.filter(req => req.id !== requestToDelete.value!.id)
+    try {
+      await axios.delete(`${API_URL}/${requestToDelete.value.id}`)
+      requestsData.value = requestsData.value.filter(req => req.id !== requestToDelete.value!.id)
+    } catch (error) {
+      console.error("O'chirishda xatolik:", error)
+    }
     requestToDelete.value = null
   }
   isDeleteDialogOpen.value = false
-}
-
-const requestsData = ref<Request[]>([...mockRequests])
-const selectedRequest = ref<Request | null>(null)
-const isDetailDialogOpen = ref(false)
-
-const handleDelete = (id: number) => {
-  requestsData.value = requestsData.value.filter(req => req.id !== id)
 }
 
 const handleViewDetails = (request: Request) => {
@@ -52,8 +67,8 @@ const handleViewDetails = (request: Request) => {
   isDetailDialogOpen.value = true
 }
 
-const getCourseName = (courseId: number) => {
-  return courses.find(course => course.id === courseId)?.name || 'Noma\'lum kurs'
+const getCourseName = (req: Request) => {
+  return req.course?.name || 'Noma\'lum kurs'
 }
 
 const formatPhoneNumber = (phone: string) => {
@@ -62,6 +77,8 @@ const formatPhoneNumber = (phone: string) => {
 
 const totalRequests = computed(() => requestsData.value.length)
 const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
+
+onMounted(fetchRequests)
 </script>
 
 <template>
@@ -74,45 +91,43 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
     </div>
 
     <!-- Stats -->
-    <!-- Stats -->
-<div class="flex flex-wrap gap-4">
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs sm:text-sm text-muted-foreground">Jami So'rovlar</p>
-          <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
-        </div>
-        <Mail class="w-6 sm:w-8 h-6 sm:h-8 text-blue-500" />
-      </div>
-    </CardContent>
-  </Card>
+    <div class="flex flex-wrap gap-4">
+      <Card class="flex-1 min-w-[150px]">
+        <CardContent class="p-4 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm text-muted-foreground">Jami So'rovlar</p>
+              <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
+            </div>
+            <Mail class="w-6 sm:w-8 h-6 sm:h-8 text-blue-500" />
+          </div>
+        </CardContent>
+      </Card>
 
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs sm:text-sm text-muted-foreground">Bugun</p>
-          <p class="text-lg sm:text-2xl font-semibold">{{ todayRequests }}</p>
-        </div>
-        <CheckCircle class="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
-      </div>
-    </CardContent>
-  </Card>
+      <Card class="flex-1 min-w-[150px]">
+        <CardContent class="p-4 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm text-muted-foreground">Bugun</p>
+              <p class="text-lg sm:text-2xl font-semibold">{{ todayRequests }}</p>
+            </div>
+            <CheckCircle class="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
+          </div>
+        </CardContent>
+      </Card>
 
-  <Card class="flex-1 min-w-[150px]">
-    <CardContent class="p-4 sm:p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs sm:text-sm text-muted-foreground">Javob kutmoqda</p>
-          <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
-        </div>
-        <Phone class="w-6 sm:w-8 h-6 sm:h-8 text-orange-500" />
-      </div>
-    </CardContent>
-  </Card>
-</div>
-  
+      <Card class="flex-1 min-w-[150px]">
+        <CardContent class="p-4 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs sm:text-sm text-muted-foreground">Javob kutmoqda</p>
+              <p class="text-lg sm:text-2xl font-semibold">{{ totalRequests }}</p>
+            </div>
+            <Phone class="w-6 sm:w-8 h-6 sm:h-8 text-orange-500" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
 
     <!-- Table -->
     <Card>
@@ -120,7 +135,10 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
         <CardTitle>Barcha So'rovlar</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
+        <div v-if="loading" class="text-center py-6 text-muted-foreground">
+          Yuklanmoqda...
+        </div>
+        <Table v-else>
           <TableHeader>
             <TableRow>
               <TableHead>Ism</TableHead>
@@ -137,7 +155,7 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
               <TableCell>{{ formatPhoneNumber(req.number) }}</TableCell>
               <TableCell>{{ req.mail }}</TableCell>
               <TableCell>
-                <Badge variant="outline">{{ getCourseName(req.course_id) }}</Badge>
+                <Badge variant="outline">{{ getCourseName(req) }}</Badge>
               </TableCell>
               <TableCell>
                 <Badge variant="secondary">Yangi</Badge>
@@ -147,7 +165,7 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
                   <Button size="sm" variant="outline" @click="handleViewDetails(req)">
                     <Eye class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="() => { requestToDelete = req; isDeleteDialogOpen = true }">
+                  <Button size="sm" variant="destructive" @click="() => { requestToDelete.value = req; isDeleteDialogOpen.value = true }">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>
@@ -158,7 +176,7 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
       </CardContent>
     </Card>
 
-    <!-- Dialog -->
+    <!-- Detail Dialog -->
     <Dialog :open="isDetailDialogOpen" @update:open="val => isDetailDialogOpen = val">
       <DialogContent class="max-w-2xl">
         <DialogHeader>
@@ -184,7 +202,7 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
             </div>
             <div>
               <label class="text-sm text-muted-foreground">Kurs</label>
-              <p>{{ getCourseName(selectedRequest.course_id) }}</p>
+              <p>{{ getCourseName(selectedRequest) }}</p>
             </div>
           </div>
 
@@ -207,19 +225,21 @@ const todayRequests = computed(() => Math.floor(totalRequests.value / 3))
         </div>
       </DialogContent>
     </Dialog>
+
+    <!-- Delete Dialog -->
+    <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>So'rovni o'chirishni tasdiqlaysizmi?</DialogTitle>
+        </DialogHeader>
+        <p class="text-sm text-muted-foreground">
+          "{{ requestToDelete?.name }}" ismli foydalanuvchining so‘rovi o‘chiriladi. Davom etasizmi?
+        </p>
+        <div class="flex justify-end gap-2 mt-4">
+          <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+          <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
-  <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>So'rovni o'chirishni tasdiqlaysizmi?</DialogTitle>
-    </DialogHeader>
-    <p class="text-sm text-muted-foreground">
-      "{{ requestToDelete?.name }}" ismli foydalanuvchining so‘rovi o‘chiriladi. Davom etasizmi?
-    </p>
-    <div class="flex justify-end gap-2 mt-4">
-      <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
-      <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
-    </div>
-  </DialogContent>
-</Dialog>
 </template>
