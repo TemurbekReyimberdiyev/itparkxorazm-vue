@@ -292,8 +292,8 @@
                 "
               />
               <img
-                v-if="skill.icon_url"
-                :src="skill.icon_url"
+                v-if="skill.image_url"
+                :src="skill.image_url"
                 class="w-8 h-8 rounded object-cover"
                 :alt="skill.name"
               />
@@ -520,8 +520,7 @@ const openEditDialog = (mentor: Mentor) => {
     experience_years: mentor.experience_years || 1,
     students: mentor.students || 0,
     image: mentor.image_url || '',
-    email: mentor.email || '',
-    phone: mentor.phone || '',
+    
   }
   previewImage.value = mentor.image_url || ''
   isDialogOpen.value = true
@@ -658,7 +657,7 @@ const handleSkillToggle = async (skillId: number, checked: boolean) => {
 
 const isSkillSelected = (mentor: Mentor | null, skillId: number): boolean => {
   if (!mentor) return false
-  return (mentor.skill_ids || []).includes(skillId)
+  return (mentor.skills || []).includes(skillId)
 }
 
 // Effects

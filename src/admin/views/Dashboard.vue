@@ -5,7 +5,7 @@
       <p class="text-muted-foreground">IT O'quv Markazi boshqaruv paneli</p>
     </div>
 
-    <!-- Stat Cards (always 4 in 1 row even on mobile) -->
+    <!-- Stat Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <Card
         v-for="(stat, index) in stats"
@@ -38,7 +38,7 @@
             <div class="space-y-1">
               <p>{{ request.name }}</p>
               <p class="text-sm text-muted-foreground">
-                {{ getCourseName(request.course_id) }}
+                {{ request.course?.name || 'Nomalum kurs' }}
               </p>
             </div>
             <Badge variant="secondary">Yangi</Badge>
@@ -70,66 +70,100 @@
       </Card>
     </div>
 
-    <Card>
-      <CardHeader>
-        <CardTitle>Mashhur Kurslar</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          <div
-            v-for="course in courses"
-            :key="course.id"
-            class="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-          >
-            <div class="flex items-center gap-4">
-              <img
-                :src="course.image_url"
-                :alt="course.name"
-                class="w-12 h-12 rounded-lg object-cover"
-              />
-              <div>
-                <p>{{ course.name }}</p>
-                <p class="text-sm text-muted-foreground">
-                  {{ getCategoryName(course.category_id) }}
-                </p>
-              </div>
-            </div>
-            <div class="text-right">
-              <p>{{ getMentor(course.id)?.students || 0 }} talaba</p>
-              <p class="text-sm text-muted-foreground">{{ course.duration_month }} oy</p>
-            </div>
+    <!-- Mashhur Kurslar -->
+<Card>
+  <CardHeader>
+    <CardTitle>Mashhur Kurslar</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-4">
+      <div
+        v-for="course in topCourses"
+        :key="course.id"
+        class="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+      >
+        <div class="flex items-center gap-4">
+          <img
+            :src="course.image_url"
+            :alt="course.name"
+            class="w-12 h-12 rounded-lg object-cover"
+          />
+          <div>
+            <p>{{ course.name }}</p>
+            <p class="text-sm text-muted-foreground">
+              {{ getCategoryName(course.category_id) }}
+            </p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        <div class="text-right">
+          <p>{{ getMentor(course.id)?.students || 0 }} talaba</p>
+          <p class="text-sm text-muted-foreground">{{ course.duration_month }} oy</p>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { Card, CardHeader, CardTitle, CardContent } from '@/admin/components/ui/card'
 import { Badge } from '@/admin/components/ui/badge'
 import { BookOpen, Users, FolderOpen, MessageCircle, TrendingUp } from 'lucide-vue-next'
-import { categories, courses, mentors, requests, news } from '@/admin/data/mockData'
 
-const stats = [
-  { title: 'Jami Kurslar', value: courses.length, icon: BookOpen, color: 'bg-blue-500' },
-  { title: 'Mentorlar', value: mentors.length, icon: Users, color: 'bg-green-500' },
-  { title: 'Kategoriyalar', value: categories.length, icon: FolderOpen, color: 'bg-purple-500' },
-  { title: "Yangi So'rovlar", value: requests.length, icon: MessageCircle, color: 'bg-orange-500' },
-]
+const categories = ref([])
+const courses = ref([])
+const mentors = ref([])
+const requests = ref([])
+const news = ref([])
+
+const stats = computed(() => [
+  { title: 'Jami Kurslar', value: courses.value.length, icon: BookOpen, color: 'bg-blue-500' },
+  { title: 'Mentorlar', value: mentors.value.length, icon: Users, color: 'bg-green-500' },
+  { title: 'Kategoriyalar', value: categories.value.length, icon: FolderOpen, color: 'bg-purple-500' },
+  { title: "Yangi So'rovlar", value: requests.value.length, icon: MessageCircle, color: 'bg-orange-500' },
+])
+
+const topCourses = computed(() => {
+  return [...courses.value]
+    .sort((a, b) => (getMentor(b.id)?.students || 0) - (getMentor(a.id)?.students || 0))
+    .slice(0, 2)
+})
+
 
 const totalStudents = computed(() =>
-  mentors.reduce((sum, m) => sum + m.students, 0)
+  mentors.value.reduce((sum, m) => sum + m.students, 0)
 )
 
 const averageExperience = computed(() =>
-  mentors.reduce((sum, m) => sum + m.experience_years, 0) / mentors.length
+  mentors.value.length
+    ? mentors.value.reduce((sum, m) => sum + m.experience_years, 0) / mentors.value.length
+    : 0
 )
 
-const getCourseName = (id) => courses.find((c) => c.id === id)?.name || 'Nomalum'
-const getCategoryName = (id) => categories.find((c) => c.id === id)?.name || 'Nomalum'
-const getMentor = (courseId) => mentors.find((m) => m.course_id === courseId)
+const getCategoryName = (id) => categories.value.find((c) => c.id === id)?.name || 'Nomalum'
+const getMentor = (courseId) => mentors.value.find((m) => m.course_id === courseId)
+
+onMounted(async () => {
+  const base = 'https://itparkxorazm-laravel.test/api'
+
+  const [catRes, courseRes, mentorRes, requestRes, newsRes] = await Promise.all([
+    axios.get(`${base}/categories`),
+    axios.get(`${base}/courses`),
+    axios.get(`${base}/mentors`),
+    axios.get(`${base}/requests`),
+    axios.get(`${base}/news`),
+  ])
+
+  categories.value = catRes.data
+  courses.value = courseRes.data
+  mentors.value = mentorRes.data
+  requests.value = requestRes.data
+  news.value = newsRes.data
+})
 </script>
 
 <style scoped>
