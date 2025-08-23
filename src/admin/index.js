@@ -2,7 +2,7 @@ export default [
   {
     path: '/admin/login',
     name: 'AdminLogin',
-    component: () => import('@/admin/views/Login.vue'), // login sahifangiz
+    component: () => import('@/admin/views/Login.vue'),
   },
   {
     path: '/admin',
@@ -13,7 +13,7 @@ export default [
         name: 'AdminDashboard',
         component: () => import('@/admin/views/Dashboard.vue'),
       },
-      // boshqa admin sahifalar bu yerda bo'ladi
+      // boshqa sahifalar
     ],
   },
 ]

@@ -93,6 +93,7 @@ const carouselBreakpoints = {
 // API dan keladigan yangiliklar ro‘yxati
 const newsList = ref([])
 
+
 // Ma’lumotni API’dan olish
 const fetchNews = async () => {
   try {

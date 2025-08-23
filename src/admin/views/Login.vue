@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/admin/stores/auth'
+import axios from 'axios'
 import { Lock, User, Eye, EyeOff } from 'lucide-vue-next'
 import {
   Card,
@@ -33,15 +34,24 @@ const handleSubmit = async (e) => {
   isLoading.value = true
   error.value = ''
 
-  setTimeout(() => {
-    if (username.value === 'admin' && password.value === 'admin123') {
-      auth.login()
-      router.push('/admin')
-    } else {
-      error.value = 'Login yoki parol noto‘g‘ri'
-    }
+  try {
+    // Laravel API'ga so'rov
+    const { data } = await axios.post(
+  'http://itparkxorazm-laravel.test/api/login',
+  {
+    username: username.value,
+    password: password.value,
+  }
+)
+
+    // API tokenni store va localStorage ga saqlash
+    auth.login(data.token)
+    router.push('/admin')
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Login yoki parol noto‘g‘ri'
+  } finally {
     isLoading.value = false
-  }, 1000)
+  }
 }
 </script>
 
@@ -117,14 +127,6 @@ const handleSubmit = async (e) => {
               {{ isLoading ? 'Kirmoqda...' : 'Kirish' }}
             </Button>
           </form>
-
-          <div class="mt-6 p-4 bg-muted/50 rounded-lg">
-            <p class="text-sm text-muted-foreground mb-2">Demo uchun:</p>
-            <div class="space-y-1 text-xs">
-              <p><strong>Foydalanuvchi:</strong> admin</p>
-              <p><strong>Parol:</strong> admin123</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
 

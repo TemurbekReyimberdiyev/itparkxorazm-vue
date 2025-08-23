@@ -178,13 +178,16 @@ onMounted(fetchNews)
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>#</TableHead> <!-- yangi ustun -->
             <TableHead>Sarlavha</TableHead>
             <TableHead class="hidden sm:table-cell">Matn</TableHead>
             <TableHead>Amallar</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          <TableRow v-for="item in filteredNews" :key="item.id">
+          <TableRow v-for="(item, index) in filteredNews" :key="item.id">
+            <TableCell>{{ index + 1 }}</TableCell> <!-- tartib raqami -->
             <TableCell class="flex items-center gap-3">
               <img v-if="item.full_image_url" :src="item.full_image_url" class="w-12 h-12 rounded object-cover" />
               <span>{{ item.heading }}</span>
