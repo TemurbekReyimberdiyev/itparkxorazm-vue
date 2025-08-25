@@ -64,25 +64,25 @@ import News from '@/admin/views/News.vue'
 const auth = useAuthStore()
 const router = useRouter()
 
-// LocalStorage dan so‘nggi ochilgan sahifani olish
+// LocalStorage dan o‘qish, agar mavjud bo‘lmasa dashboard
 const savedPage = localStorage.getItem('currentPage') || 'dashboard'
 const currentPage = ref(savedPage)
 const isSidebarOpen = ref(false)
 const username = 'Admin'
 
-// Sahifani o‘zgartirish va saqlash
+// Sahifa o‘zgarganda saqlash
 function handlePageChange(page: string) {
   currentPage.value = page
-  localStorage.setItem('currentPage', page) // LocalStorage ga saqlash
-  isSidebarOpen.value = false // Mobil holatda menyuni yopish
+  localStorage.setItem('currentPage', page)
+  isSidebarOpen.value = false
 }
-
-// Logout
+// Logout -> localStorage tozalash
 function handleLogout() {
+  localStorage.removeItem('currentPage')  // ❌ Keyin qayta login qilganda default "dashboard"
   auth.logout()
   router.push('/admin/login')
 }
-
+localStorage.setItem('currentPage', 'dashboard')
 // Mobil sidebar toggle
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value

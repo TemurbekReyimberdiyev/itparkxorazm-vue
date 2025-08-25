@@ -29,6 +29,7 @@ import type { Request } from '@/admin/types/database'
 
 const API_URL = 'https://itparkxorazm-laravel.test/api/requests'
 
+// State
 const isDeleteDialogOpen = ref(false)
 const requestToDelete = ref<Request | null>(null)
 
@@ -37,6 +38,7 @@ const selectedRequest = ref<Request | null>(null)
 const isDetailDialogOpen = ref(false)
 const loading = ref(false)
 
+// Fetch data
 const fetchRequests = async () => {
   loading.value = true
   try {
@@ -49,11 +51,14 @@ const fetchRequests = async () => {
   }
 }
 
+// Delete confirm
 const handleDeleteConfirm = async () => {
   if (requestToDelete.value) {
     try {
       await axios.delete(`${API_URL}/${requestToDelete.value.id}`)
-      requestsData.value = requestsData.value.filter(req => req.id !== requestToDelete.value!.id)
+      requestsData.value = requestsData.value.filter(
+        (req) => req.id !== requestToDelete.value?.id
+      )
     } catch (error) {
       console.error("O'chirishda xatolik:", error)
     }
@@ -62,13 +67,15 @@ const handleDeleteConfirm = async () => {
   isDeleteDialogOpen.value = false
 }
 
+// View details
 const handleViewDetails = (request: Request) => {
   selectedRequest.value = request
   isDetailDialogOpen.value = true
 }
 
+// Helpers
 const getCourseName = (req: Request) => {
-  return req.course?.name || 'Noma\'lum kurs'
+  return req.course?.name || "Noma'lum kurs"
 }
 
 const formatPhoneNumber = (phone: string) => {
@@ -165,7 +172,9 @@ onMounted(fetchRequests)
                   <Button size="sm" variant="outline" @click="handleViewDetails(req)">
                     <Eye class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="() => { requestToDelete.value = req; isDeleteDialogOpen.value = true }">
+                  <!-- ✅ DELETE BUTTON -->
+                  <Button size="sm" variant="destructive" 
+                          @click="() => { requestToDelete = req; isDeleteDialogOpen = true }">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>

@@ -7,7 +7,7 @@ import { Label } from '@/admin/components/ui/label'
 import { Textarea } from '@/admin/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/admin/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
-import { Plus, Pencil, Trash2, Search, Image as ImageIcon } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, Search } from 'lucide-vue-next'
 import { useToast } from '@/admin/components/ui/toast'
 
 const API_URL = 'https://itparkxorazm-laravel.test/api/news'
@@ -18,6 +18,10 @@ const editingNews = ref(null)
 const searchTerm = ref('')
 const imagePreview = ref<string | null>(null)
 const selectedImageFile = ref<File | null>(null)
+
+// ✅ O‘chirish uchun state
+const isDeleteDialogOpen = ref(false)
+const newsToDelete = ref<any | null>(null)
 
 const { toast } = useToast()
 
@@ -73,7 +77,7 @@ const handleSubmit = async () => {
     }
 
     if (editingNews.value) {
-      data.append('_method', 'PUT') // For Laravel PUT with FormData
+      data.append('_method', 'PUT')
       await axios.post(`${API_URL}/${editingNews.value.id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -105,15 +109,19 @@ const handleEdit = (item) => {
   isDialogOpen.value = true
 }
 
-const handleDelete = async (id) => {
-  if (confirm('Bu yangilikni o‘chirishni xohlaysizmi?')) {
-    try {
-      await axios.delete(`${API_URL}/${id}`)
-      toast({ title: 'Muvaffaqiyat', description: 'Yangilik o‘chirildi' })
-      fetchNews()
-    } catch {
-      toast({ title: 'Xatolik', description: 'O‘chirishda xatolik', variant: 'destructive' })
-    }
+// ❌ Eski confirm o‘rniga
+// ✅ Delete tasdiqlash
+const handleDeleteConfirm = async () => {
+  if (!newsToDelete.value) return
+  try {
+    await axios.delete(`${API_URL}/${newsToDelete.value.id}`)
+    toast({ title: 'Muvaffaqiyat', description: 'Yangilik o‘chirildi' })
+    fetchNews()
+  } catch {
+    toast({ title: 'Xatolik', description: 'O‘chirishda xatolik', variant: 'destructive' })
+  } finally {
+    newsToDelete.value = null
+    isDeleteDialogOpen.value = false
   }
 }
 
@@ -178,7 +186,7 @@ onMounted(fetchNews)
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead> <!-- yangi ustun -->
+            <TableHead>#</TableHead>
             <TableHead>Sarlavha</TableHead>
             <TableHead class="hidden sm:table-cell">Matn</TableHead>
             <TableHead>Amallar</TableHead>
@@ -187,7 +195,7 @@ onMounted(fetchNews)
 
         <TableBody>
           <TableRow v-for="(item, index) in filteredNews" :key="item.id">
-            <TableCell>{{ index + 1 }}</TableCell> <!-- tartib raqami -->
+            <TableCell>{{ index + 1 }}</TableCell>
             <TableCell class="flex items-center gap-3">
               <img v-if="item.full_image_url" :src="item.full_image_url" class="w-12 h-12 rounded object-cover" />
               <span>{{ item.heading }}</span>
@@ -200,7 +208,8 @@ onMounted(fetchNews)
                 <Button variant="outline" size="sm" @click="handleEdit(item)">
                   <Pencil class="h-4 w-4" /> <span class="hidden sm:inline ml-2">Tahrirlash</span>
                 </Button>
-                <Button variant="outline" size="sm" class="text-red-500" @click="handleDelete(item.id)">
+                <Button variant="outline" size="sm" class="text-red-500"
+                        @click="() => { newsToDelete = item; isDeleteDialogOpen = true }">
                   <Trash2 class="h-4 w-4" /> <span class="hidden sm:inline ml-2">O‘chirish</span>
                 </Button>
               </div>
@@ -212,5 +221,21 @@ onMounted(fetchNews)
         Natija topilmadi
       </div>
     </div>
+
+    <!-- Delete Confirm Dialog -->
+    <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Yangilikni o‘chirishni tasdiqlaysizmi?</DialogTitle>
+        </DialogHeader>
+        <p class="text-sm text-muted-foreground">
+          "{{ newsToDelete?.heading }}" sarlavhali yangilik o‘chiriladi. Davom etasizmi?
+        </p>
+        <div class="flex justify-end gap-2 mt-4">
+          <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+          <Button variant="destructive" @click="handleDeleteConfirm">Ha, o‘chir</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

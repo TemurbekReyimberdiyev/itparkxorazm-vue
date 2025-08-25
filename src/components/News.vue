@@ -103,7 +103,19 @@ const carouselBreakpoints = {
 
 // API dan keladigan yangiliklar ro‘yxati
 const newsList = ref([])
+const formatUzDate = (dateString) => {
+  const months = [
+    "yanvar", "fevral", "mart", "aprel", "may", "iyun",
+    "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"
+  ]
 
+  const d = new Date(dateString)
+  const day = d.getDate()
+  const month = months[d.getMonth()]  // 0-indeks
+  const year = d.getFullYear()
+
+  return `${day}-${month}, ${year}`
+}
 
 // Ma’lumotni API’dan olish
 const fetchNews = async () => {
@@ -111,7 +123,7 @@ const fetchNews = async () => {
     const res = await api.get('/news') // Laravel route: Route::get('/news', ...)
     newsList.value = res.data.map(item => ({
       image: item.full_image_url,
-      date: new Date(item.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' }),
+      date: formatUzDate(item.created_at),
       title: item.heading,
       description: item.description
     }))

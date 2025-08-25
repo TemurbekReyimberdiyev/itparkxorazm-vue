@@ -1,102 +1,3 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-
-import {
-  Card, CardContent, CardHeader, CardTitle
-} from '@/admin/components/ui/card'
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/admin/components/ui/table'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
-} from '@/admin/components/ui/dialog'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
-import { Input } from '@/admin/components/ui/input'
-import ImageUpload from '@/admin/views/ImageUpload.vue'
-import { Plus, Edit, Trash2, Award, Users } from 'lucide-vue-next'
-
-import type { Skill } from '@/admin/types/database'
-
-// API URL
-const API_URL = 'https://itparkxorazm-laravel.test/api/skills'
-
-// State
-const skillsData = ref<Skill[]>([])
-const isDialogOpen = ref(false)
-const editingSkill = ref<Skill | null>(null)
-const formData = ref<Partial<Skill>>({
-  name: '',
-  image_url: ''
-})
-
-// Delete confirm dialog
-const isDeleteDialogOpen = ref(false)
-const skillToDelete = ref<Skill | null>(null)
-
-// Fetch data from API
-async function fetchSkills() {
-  try {
-    const res = await axios.get(API_URL)
-    skillsData.value = res.data
-  } catch (error) {
-    console.error('API fetch error:', error)
-  }
-}
-
-onMounted(() => {
-  fetchSkills()
-})
-
-// Add / Update
-async function handleSubmit(e: Event) {
-  e.preventDefault()
-  try {
-    if (editingSkill.value) {
-      // Update
-      await axios.put(`${API_URL}/${editingSkill.value.id}`, formData.value)
-    } else {
-      // Create
-      await axios.post(API_URL, formData.value)
-    }
-    await fetchSkills()
-    isDialogOpen.value = false
-    editingSkill.value = null
-    resetForm()
-  } catch (error) {
-    console.error('Save error:', error)
-  }
-}
-
-// Delete confirm
-async function handleDeleteConfirm() {
-  if (!skillToDelete.value) return
-  try {
-    await axios.delete(`${API_URL}/${skillToDelete.value.id}`)
-    await fetchSkills()
-  } catch (error) {
-    console.error('Delete error:', error)
-  }
-  isDeleteDialogOpen.value = false
-  skillToDelete.value = null
-}
-
-function resetForm() {
-  formData.value = { name: '', image_url: '' }
-}
-
-function handleEdit(skill: Skill) {
-  editingSkill.value = skill
-  formData.value = { name: skill.name, image_url: skill.image_url }
-  isDialogOpen.value = true
-}
-
-function getMentorCount(skill: Skill) {
-  return skill.mentors ? skill.mentors.length : 0
-}
-</script>
-
 <template>
   <div class="space-y-6">
     <!-- Header -->
@@ -106,33 +7,41 @@ function getMentorCount(skill: Skill) {
         <p class="text-muted-foreground">Texnologik ko'nikmalarni boshqaring</p>
       </div>
 
-      <Dialog :open="isDialogOpen" @update:open="val => isDialogOpen = val">
+      <Dialog v-model:open="isDialogOpen">
         <DialogTrigger as-child>
-          <Button @click="() => { editingSkill = null; resetForm() }">
+          <Button @click="handleAddSkill">
             <Plus class="w-4 h-4 mr-2" /> Yangi Ko'nikma
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{{ editingSkill ? "Ko'nikmani Tahrirlash" : "Yangi Ko'nikma Qo'shish" }}</DialogTitle>
+            <DialogTitle>
+              {{ editingSkill ? "Ko'nikmani Tahrirlash" : "Yangi Ko'nikma Qo'shish" }}
+            </DialogTitle>
+            <DialogDescription>
+              {{ editingSkill ? "Ko'nikma ma'lumotlarini o'zgartiring va saqlang." : "Yangi ko'nikma ma'lumotlarini to'ldiring va qo'shing." }}
+            </DialogDescription>
           </DialogHeader>
 
-          <form @submit="handleSubmit" class="space-y-4">
+          <form @submit.prevent="handleSubmit" class="space-y-4">
             <div class="space-y-2">
-              <label>Ko'nikma nomi</label>
+              <Label>Ko'nikma nomi</Label>
               <Input v-model="formData.name" required placeholder="Ko'nikma nomini kiriting" />
             </div>
+
             <div class="space-y-2">
-              <label>Ko'nikma rasmi</label>
-              <ImageUpload :value="formData.image_url" @change="url => formData.image_url = url" />
+              <Label>Ko'nikma rasmi</Label>
+              <ImageUpload v-model:value="formData.full_image_url" @change="handleImageChange" placeholder="Ko'nikma rasmini yuklang" />
             </div>
+
             <div v-if="formData.name" class="space-y-2">
-              <label>Preview</label>
+              <Label>Preview</Label>
               <div class="flex items-center gap-3 p-3 border rounded-lg">
-                <img :src="formData.image_url || '/no-image.png'" class="w-12 h-12 rounded object-cover" />
+                <img :src="formData.full_image_url || '/no-image.png'" :alt="formData.name" class="w-12 h-12 rounded object-cover" />
                 <span>{{ formData.name }}</span>
               </div>
             </div>
+
             <div class="flex gap-2 justify-end">
               <Button type="button" variant="outline" @click="isDialogOpen = false">Bekor qilish</Button>
               <Button type="submit">{{ editingSkill ? "Saqlash" : "Qo'shish" }}</Button>
@@ -160,7 +69,7 @@ function getMentorCount(skill: Skill) {
           <TableBody>
             <TableRow v-for="skill in skillsData" :key="skill.id">
               <TableCell>
-                <img :src="skill.image_url" class="w-10 h-10 rounded object-cover" />
+                <img :src="skill.full_image_url || '/no-image.png'" :alt="skill.name" class="w-10 h-10 rounded object-cover" />
               </TableCell>
               <TableCell>{{ skill.name }}</TableCell>
               <TableCell>
@@ -171,7 +80,7 @@ function getMentorCount(skill: Skill) {
                   <Button size="sm" variant="outline" @click="handleEdit(skill)">
                     <Edit class="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" @click="() => { skillToDelete = skill; isDeleteDialogOpen = true }">
+                  <Button size="sm" variant="destructive" @click="handleDeleteClick(skill)">
                     <Trash2 class="w-4 h-4" />
                   </Button>
                 </div>
@@ -179,23 +88,168 @@ function getMentorCount(skill: Skill) {
             </TableRow>
           </TableBody>
         </Table>
+
+        <div v-if="skillsData.length === 0" class="text-center py-8">
+          <p class="text-muted-foreground">Hozircha ko'nikmalar yo'q</p>
+        </div>
       </CardContent>
     </Card>
-  </div>
 
-  <!-- Delete Confirmation -->
-  <Dialog :open="isDeleteDialogOpen" @update:open="val => isDeleteDialogOpen = val">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Ko'nikmani o'chirishni tasdiqlaysizmi?</DialogTitle>
-      </DialogHeader>
-      <p class="text-sm text-muted-foreground">
-        "{{ skillToDelete?.name }}" nomli ko‘nikma o‘chiriladi.
-      </p>
-      <div class="flex justify-end gap-2 mt-4">
-        <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
-        <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
-      </div>
-    </DialogContent>
-  </Dialog>
+    <!-- Delete Confirmation -->
+    <Dialog v-model:open="isDeleteDialogOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Ko'nikmani o'chirishni tasdiqlaysizmi?</DialogTitle>
+          <DialogDescription>Bu amal qaytarib bo'lmaydigan amal hisoblanadi.</DialogDescription>
+        </DialogHeader>
+        <p class="text-sm text-muted-foreground">
+          "{{ skillToDelete?.name }}" nomli ko'nikma o'chiriladi.
+        </p>
+        <div class="flex justify-end gap-2 mt-4">
+          <Button variant="outline" @click="isDeleteDialogOpen = false">Bekor qilish</Button>
+          <Button variant="destructive" @click="handleDeleteConfirm">Ha, o'chir</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted } from "vue"
+import { Card, CardContent, CardHeader, CardTitle } from "@/admin/components/ui/card"
+import { Button } from "@/admin/components/ui/button"
+import { Input } from "@/admin/components/ui/input"
+import { Label } from "@/admin/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/admin/components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/admin/components/ui/table"
+import { Badge } from "@/admin/components/ui/badge"
+import { Plus, Edit, Trash2 } from "lucide-vue-next"
+import { toast } from "@/admin/components/ui/toast"
+import ImageUpload from "./ImageUpload.vue"
+
+const API_URL = "https://itparkxorazm-laravel.test/api/skills"
+
+interface Skill {
+  id: number
+  name: string
+  image_path: string
+  full_image_url: string
+  mentors?: any[]
+}
+
+interface SkillFormData {
+  name: string
+  image_path: string
+  full_image_url: string
+}
+
+// state
+const skillsData = ref<Skill[]>([])
+const isDialogOpen = ref(false)
+const editingSkill = ref<Skill | null>(null)
+const formData = reactive<SkillFormData>({ name: "", image_path: "", full_image_url: "" })
+
+const isDeleteDialogOpen = ref(false)
+const skillToDelete = ref<Skill | null>(null)
+
+const fetchSkills = async () => {
+  try {
+    const res = await fetch(API_URL)
+    if (!res.ok) throw new Error("API error")
+    skillsData.value = await res.json()
+  } catch (e) {
+    toast.error("Ko'nikmalarni yuklashda xatolik yuz berdi")
+    skillsData.value = []
+  }
+}
+
+onMounted(fetchSkills)
+
+const handleSubmit = async () => {
+  if (!formData.name.trim()) {
+    toast.error("Ko'nikma nomi kiritilishi shart")
+    return
+  }
+
+  try {
+    const url = editingSkill.value ? `${API_URL}/${editingSkill.value.id}` : API_URL
+    const method = editingSkill.value ? "POST" : "POST" // Laravel ko‘pincha PUT uchun `_method` ishlatadi
+    const fd = new FormData()
+    fd.append("name", formData.name)
+    if (formData.image_path instanceof File) {
+      fd.append("image_path", formData.image_path)
+    }
+
+    if (editingSkill.value) {
+      fd.append("_method", "PUT")
+    }
+
+    const res = await fetch(url, {
+      method,
+      body: fd,
+    })
+    if (!res.ok) throw new Error("Save error")
+
+    await fetchSkills()
+    isDialogOpen.value = false
+    editingSkill.value = null
+    resetForm()
+    toast.success(editingSkill.value ? "Ko'nikma yangilandi" : "Ko'nikma qo'shildi")
+  } catch (e) {
+    toast.error("Saqlashda xatolik yuz berdi")
+  }
+}
+
+const resetForm = () => {
+  formData.name = ""
+  formData.image_path = ""
+  formData.full_image_url = ""
+}
+
+const handleEdit = (skill: Skill) => {
+  editingSkill.value = skill
+  formData.name = skill.name
+  formData.image_path = skill.image_path
+  formData.full_image_url = skill.full_image_url
+  isDialogOpen.value = true
+}
+
+const getMentorCount = (skill: Skill) => skill.mentors ? skill.mentors.length : 0
+
+const handleImageChange = (payload: File | string | null) => {
+  if (payload instanceof File) {
+    formData.image_path = payload
+    formData.full_image_url = URL.createObjectURL(payload)
+  } else if (typeof payload === "string") {
+    formData.full_image_url = payload
+  } else {
+    formData.image_path = ""
+    formData.full_image_url = ""
+  }
+}
+
+const handleAddSkill = () => {
+  editingSkill.value = null
+  resetForm()
+  isDialogOpen.value = true
+}
+
+const handleDeleteClick = (skill: Skill) => {
+  skillToDelete.value = skill
+  isDeleteDialogOpen.value = true
+}
+
+const handleDeleteConfirm = async () => {
+  if (!skillToDelete.value) return
+  try {
+    const res = await fetch(`${API_URL}/${skillToDelete.value.id}`, { method: "DELETE" })
+    if (!res.ok) throw new Error("Delete error")
+    await fetchSkills()
+    toast.success("Ko'nikma o'chirildi")
+  } catch (e) {
+    toast.error("O'chirishda xatolik yuz berdi")
+  }
+  isDeleteDialogOpen.value = false
+  skillToDelete.value = null
+}
+</script>
