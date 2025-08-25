@@ -81,36 +81,51 @@
     </div>
 
     <!-- Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      @click.self="closeModal"
+<div
+  v-if="showModal"
+  class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+  @click.self="closeModal"
+>
+  <div
+    class="bg-white w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-xl relative transform transition-all duration-300 origin-center"
+    :class="modalAnimation"
+  >
+    <button
+      @click="closeModal"
+      class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
     >
-      <div
-        class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300 origin-center"
-        :class="modalAnimation"
-      >
-        <button
-          @click="closeModal"
-          class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
-        >
-          &times;
-        </button>
+      &times;
+    </button>
 
-        <img :src="selectedCourse.image" class="w-full h-60 object-cover rounded-xl mb-4" />
-        <p class="text-sm text-gray-500">{{ selectedCourse.duration }} | {{ selectedCourse.category }}</p>
-        <h2 class="text-2xl font-bold mt-2 mb-4">{{ selectedCourse.title }}</h2>
-        <p class="text-gray-700 mb-4">{{ selectedCourse.description }}</p>
-        <div class="flex items-center gap-4">
-          <img :src="selectedCourse.mentorImage" class="w-12 h-12 rounded-full object-cover" />
-          <div>
-            <p class="font-semibold">{{ selectedCourse.mentorName }}</p>
-            <p class="text-sm text-gray-500">{{ selectedCourse.experience }} tajriba</p>
-          </div>
-          <div class="ml-auto font-bold text-[#7dba28]">{{ selectedCourse.price }}</div>
-        </div>
+    <img :src="selectedCourse.image" class="w-full h-60 object-cover rounded-xl mb-4" />
+    <p class="text-sm text-gray-500">
+      {{ selectedCourse.duration }} | {{ selectedCourse.category }}
+    </p>
+    <h2 class="text-2xl font-bold mt-2 mb-4">{{ selectedCourse.title }}</h2>
+
+    <!-- to‘liq description chiqadi -->
+    <p class="text-gray-700 mb-4 whitespace-pre-line">
+      {{ selectedCourse.fullDescription }}
+    </p>
+
+    <div class="flex items-center gap-4">
+      <img
+        v-if="selectedCourse.mentorImage"
+        :src="selectedCourse.mentorImage"
+        class="w-12 h-12 rounded-full object-cover"
+      />
+      <div v-if="selectedCourse.mentorName">
+        <p class="font-semibold">{{ selectedCourse.mentorName }}</p>
+        <p class="text-sm text-gray-500">{{ selectedCourse.experience }} tajriba</p>
+      </div>
+      <div class="ml-auto font-bold text-[#7dba28]">
+        {{ selectedCourse.price }}
       </div>
     </div>
+  </div>
+</div>
+
+
   </section>
 </template>
 
@@ -209,31 +224,33 @@ const fetchCourses = async () => {
     const data = await res.json()
 
     courses.value = data.map(c => {
-      const firstMentor = c.mentors?.[0] || {}
+  const firstMentor = c.mentors?.[0] || {}
 
-      return {
-        id: c.id,
-        title: c.name,
-        description: c.heading,
-        duration: c.duration || '',
-        category: c.category?.name || '',
-        image: c.image_url?.startsWith('http')
-          ? c.image_url
-          : `https://itparkxorazm-laravel.test/storage/${c.image_url}`,
-        mentorName: firstMentor.first_name && firstMentor.last_name
-          ? `${firstMentor.first_name} ${firstMentor.last_name}`
-          : '',
-        mentorImage: firstMentor.image_url?.startsWith('http')
-          ? firstMentor.image_url
-          : firstMentor.image_url
-            ? `https://itparkxorazm-laravel.test/storage/${firstMentor.image_url}`
-            : '',
-        experience: firstMentor.experience_years
-          ? `${firstMentor.experience_years} yil`
-          : '',
-        price: c.price || ''
-      }
-    })
+  return {
+    id: c.id,
+    title: c.name,
+    description: c.heading,          // card uchun qisqa preview
+    fullDescription: c.description,  // modal uchun to‘liq description
+    duration: c.duration_month+" oy" || '',
+    category: c.category?.name || '',
+    image: c.image_url?.startsWith('http')
+      ? c.image_url
+      : `https://itparkxorazm-laravel.test/storage/${c.image_url}`,
+    mentorName: firstMentor.first_name && firstMentor.last_name
+      ? `${firstMentor.first_name} ${firstMentor.last_name}`
+      : '',
+    mentorImage: firstMentor.image_url?.startsWith('http')
+      ? firstMentor.image_url
+      : firstMentor.image_url
+        ? `https://itparkxorazm-laravel.test/storage/${firstMentor.image_url}`
+        : '',
+    experience: firstMentor.experience_years
+      ? `${firstMentor.experience_years} yil`
+      : '',
+    price: c.cost+" so‘m" || ''
+  }
+})
+
 
     filters.value = [...new Set(courses.value.map(c => c.category))]
     selectedFilter.value = filters.value[0] || ''

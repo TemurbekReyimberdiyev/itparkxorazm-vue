@@ -96,7 +96,7 @@
 
               <TableCell>
                 <Badge variant="outline">
-                  {{ mentor.course ? mentor.course.name : "Noma'lum kurs" }}
+                  {{ mentor.course?.name || 'Noma\'lum kurs' }}
                 </Badge>
               </TableCell>
 
@@ -217,7 +217,7 @@
               <Label>Tajriba (yil)</Label>
               <Input
                 type="number"
-                v-model="formData.experience_years"
+                v-model.number="formData.experience_years"
                 min="0"
                 required
               />
@@ -227,7 +227,7 @@
               <Label>Talabalar soni</Label>
               <Input
                 type="number"
-                v-model="formData.students"
+                v-model.number="formData.students"
                 min="0"
                 required
               />
@@ -287,9 +287,7 @@
               <Checkbox
                 :id="`skill-${skill.id}`"
                 :checked="isSkillSelected(selectedMentorForSkills, skill.id)"
-                @update:checked="
-                  (checked) => handleSkillToggle(skill.id, checked)
-                "
+                @update:checked="(checked) => handleSkillToggle(skill.id, checked)"
               />
               <img
                 v-if="skill.image_url"
@@ -317,18 +315,12 @@
 
         <div class="space-y-4">
           <p class="text-sm text-muted-foreground">
-            <strong
-              >{{ mentorToDelete?.first_name }}
-              {{ mentorToDelete?.last_name }}</strong
-            >
+            <strong>{{ mentorToDelete?.first_name }} {{ mentorToDelete?.last_name }}</strong>
             ismli mentor ma'lumotlari o'chiriladi. Ishonchingiz komilmi?
           </p>
 
           <div class="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              @click="isDeleteConfirmOpen = false"
-            >
+            <Button variant="outline" @click="isDeleteConfirmOpen = false">
               Yo'q
             </Button>
             <Button variant="destructive" @click="performDelete">
@@ -375,16 +367,38 @@ import {
   TableHeader,
   TableRow,
 } from '@/admin/components/ui/table'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/admin/components/ui/checkbox'
 import { Plus, Edit, Trash2, Award, User, Users, Clock } from 'lucide-vue-next'
-// Assume toast is available, e.g., from vue-sonner
-import { toast } from '@/admin/components/ui/toast'
+import { toast as _toast } from '@/admin/components/ui/toast'
 
 import type { Mentor, Course, Skill } from '../types/database'
 
 const API_URL = 'https://itparkxorazm-laravel.test/api'
 
-// State management
+// --- Toast helper (works with shadcn-vue OR vue-sonner style) ---
+const toast = (msg: string, type: 'success' | 'error' = 'success') => {
+  try {
+    // shadcn-vue style
+    if (typeof _toast === 'function') {
+      _toast({ title: type === 'success' ? 'Muvaffaqiyatli' : 'Xatolik', description: msg })
+      return
+    }
+    // vue-sonner style
+    // @ts-ignore
+    if (_toast?.[type]) {
+      // @ts-ignore
+      _toast[type](msg)
+      return
+    }
+  } catch (e) {
+    // fallthrough
+  }
+  // fallback
+  if (type === 'error') console.error(msg)
+  else console.log(msg)
+}
+
+// State
 const mentorsData = ref<Mentor[]>([])
 const skills = ref<Skill[]>([])
 const courses = ref<Course[]>([])
@@ -425,7 +439,7 @@ const formData = ref<MentorFormData>({
   phone: '',
 })
 
-// Computed values
+// Computed
 const totalMentors = computed(() => mentorsData.value.length)
 const totalStudents = computed(() =>
   mentorsData.value.reduce((sum, mentor) => sum + (mentor.students || 0), 0)
@@ -443,35 +457,40 @@ const activeSkillsCount = computed(() => {
   return uniqueSkills.size
 })
 
-// API functions
+// API
 const fetchMentors = async () => {
   try {
     const res = await fetch(`${API_URL}/mentors`)
+    if (!res.ok) throw new Error('Mentorlar API javobi xato')
     const data = await res.json()
-    mentorsData.value = data.map((m: any) => ({
+    mentorsData.value = (data || []).map((m: any) => ({
       ...m,
-      skill_ids: m.skills ? m.skills.map((s: Skill) => s.id) : [],
+      course_id: m.course_id ?? m.course?.id ?? null,
+      // Normalize skills to ID array
+      skill_ids: Array.isArray(m.skills) ? m.skills.map((s: Skill) => s.id) : (m.skill_ids || []),
     }))
   } catch (err) {
     console.error('fetchMentors error:', err)
-    toast.error("Mentorlar yuklanmadi")
+    toast("Mentorlar yuklanmadi", 'error')
   }
 }
 
 const fetchSkills = async () => {
   try {
     const res = await fetch(`${API_URL}/skills`)
+    if (!res.ok) throw new Error('Ko\'nikmalar API javobi xato')
     const data = await res.json()
     skills.value = data || []
   } catch (err) {
     console.error('fetchSkills error:', err)
-    toast.error("Ko'nikmalar yuklanmadi")
+    toast("Ko'nikmalar yuklanmadi", 'error')
   }
 }
 
 const fetchCourses = async () => {
   try {
     const res = await fetch(`${API_URL}/courses`)
+    if (!res.ok) throw new Error('Kurslar API javobi xato')
     const data = await res.json()
     courses.value = data || []
     if (!formData.value.course_id && courses.value.length) {
@@ -479,11 +498,11 @@ const fetchCourses = async () => {
     }
   } catch (err) {
     console.error('fetchCourses error:', err)
-    toast.error('Kurslar yuklanmadi')
+    toast('Kurslar yuklanmadi', 'error')
   }
 }
 
-// Utility functions
+// Utils
 const resetForm = (keepCourse = false) => {
   formData.value = {
     first_name: '',
@@ -491,7 +510,7 @@ const resetForm = (keepCourse = false) => {
     course_id: keepCourse
       ? formData.value.course_id
       : courses.value.length
-      ? courses.value[0].id
+      ? (courses.value[0].id as number)
       : '',
     education: '',
     experience_years: 1,
@@ -515,20 +534,21 @@ const openEditDialog = (mentor: Mentor) => {
     id: mentor.id,
     first_name: mentor.first_name || '',
     last_name: mentor.last_name || '',
-    course_id: mentor.course_id || (courses.value[0]?.id || ''),
+    course_id: (mentor.course_id as number) || mentor.course?.id || (courses.value[0]?.id || ''),
     education: mentor.education || '',
     experience_years: mentor.experience_years || 1,
     students: mentor.students || 0,
     image: mentor.image_url || '',
-    
+    email: (mentor as any).email || '',
+    phone: (mentor as any).phone || '',
   }
   previewImage.value = mentor.image_url || ''
   isDialogOpen.value = true
 }
 
 const getMentorSkills = (mentor: Mentor) => {
-  if (!mentor.skill_ids) return []
-  return skills.value.filter((skill) => mentor.skill_ids?.includes(skill.id))
+  if (!mentor?.skill_ids?.length) return []
+  return skills.value.filter((skill) => mentor.skill_ids!.includes(skill.id))
 }
 
 const onImageChange = (e: Event) => {
@@ -540,19 +560,17 @@ const onImageChange = (e: Event) => {
   }
 }
 
-// Submit handler
+// Submit (works with Laravel: uses _method=PUT for updates)
 const handleSubmit = async () => {
   loading.value = true
 
-  // Validation
   if (!formData.value.first_name || !formData.value.last_name) {
-    toast.error("Ism va familya majburiy")
+    toast('Ism va familiya majburiy', 'error')
     loading.value = false
     return
   }
-
   if (!editingMentor.value && !formData.value.image) {
-    toast.error("Rasm yuklash majburiy")
+    toast('Rasm yuklash majburiy', 'error')
     loading.value = false
     return
   }
@@ -561,35 +579,39 @@ const handleSubmit = async () => {
     const fd = new FormData()
     fd.append('first_name', formData.value.first_name)
     fd.append('last_name', formData.value.last_name)
-    fd.append('course_id', formData.value.course_id.toString())
+    fd.append('course_id', String(formData.value.course_id))
     fd.append('education', formData.value.education)
-    fd.append('experience_years', formData.value.experience_years.toString())
-    fd.append('students', formData.value.students.toString())
+    fd.append('experience_years', String(formData.value.experience_years))
+    fd.append('students', String(formData.value.students))
     if (formData.value.email) fd.append('email', formData.value.email)
     if (formData.value.phone) fd.append('phone', formData.value.phone)
     if (formData.value.image instanceof File) fd.append('image', formData.value.image)
 
-    const url = editingMentor.value
-      ? `${API_URL}/mentors/${editingMentor.value.id}`
+    const isEdit = !!editingMentor.value
+    const url = isEdit
+      ? `${API_URL}/mentors/${editingMentor.value!.id}`
       : `${API_URL}/mentors`
-    const method = editingMentor.value ? 'PUT' : 'POST'
+
+    // Laravel-friendly: if edit, send POST with _method=PUT to support multipart
+    const method = isEdit ? 'POST' : 'POST'
+    if (isEdit) fd.append('_method', 'PUT')
 
     const res = await fetch(url, { method, body: fd })
     if (!res.ok) throw new Error('API error')
 
-    await fetchMentors() // Refetch to update list
-    toast.success(editingMentor.value ? "Mentor muvaffaqiyatli tahrirlandi" : "Mentor muvaffaqiyatli qo'shildi")
+    await fetchMentors()
+    toast(isEdit ? 'Mentor muvaffaqiyatli tahrirlandi' : "Mentor muvaffaqiyatli qo'shildi")
     isDialogOpen.value = false
-    resetForm()
+    resetForm(true)
   } catch (error) {
     console.error(error)
-    toast.error('Xatolik yuz berdi')
+    toast('Saqlashda xatolik yuz berdi', 'error')
   } finally {
     loading.value = false
   }
 }
 
-// Delete handlers
+// Delete
 const confirmDelete = (mentor: Mentor) => {
   mentorToDelete.value = mentor
   isDeleteConfirmOpen.value = true
@@ -597,21 +619,22 @@ const confirmDelete = (mentor: Mentor) => {
 
 const performDelete = async () => {
   if (!mentorToDelete.value) return
-
   try {
-    await fetch(`${API_URL}/mentors/${mentorToDelete.value.id}`, { method: 'DELETE' })
+    const res = await fetch(`${API_URL}/mentors/${mentorToDelete.value.id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error("O'chirishda xatolik")
     await fetchMentors()
     isDeleteConfirmOpen.value = false
     mentorToDelete.value = null
-    toast.success("Mentor muvaffaqiyatli o'chirildi")
+    toast("Mentor muvaffaqiyatli o'chirildi")
   } catch (err) {
     console.error('performDelete error:', err)
-    toast.error("O'chirishda xatolik yuz berdi")
+    toast("O'chirishda xatolik yuz berdi", 'error')
   }
 }
 
 // Skills management
 const handleSkillsManagement = (mentor: Mentor) => {
+  // clone to avoid mutating list item directly
   selectedMentorForSkills.value = { ...mentor }
   isSkillDialogOpen.value = true
 }
@@ -648,16 +671,16 @@ const handleSkillToggle = async (skillId: number, checked: boolean) => {
       skill_ids: mentorsData.value.find((m) => m.id === mentorId)?.skill_ids || [],
     }
 
-    toast.success(checked ? "Ko'nikma qo'shildi" : "Ko'nikma olib tashlandi")
+    toast(checked ? "Ko'nikma qo'shildi" : "Ko'nikma olib tashlandi")
   } catch (err) {
     console.error('handleSkillToggle error:', err)
-    toast.error("Ko'nikmani o'zgartirishda xatolik")
+    toast("Ko'nikmani o'zgartirishda xatolik", 'error')
   }
 }
 
 const isSkillSelected = (mentor: Mentor | null, skillId: number): boolean => {
   if (!mentor) return false
-  return (mentor.skills || []).includes(skillId)
+  return Array.isArray(mentor.skill_ids) ? mentor.skill_ids.includes(skillId) : false
 }
 
 // Effects

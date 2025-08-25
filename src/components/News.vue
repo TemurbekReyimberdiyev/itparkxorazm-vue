@@ -46,27 +46,38 @@
       </Carousel>
 
       <!-- Modal -->
-      <div
-        v-if="showModal"
-        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-        @click.self="closeModal"
-      >
-        <div
-          class="bg-white w-[90%] max-w-2xl p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
-          :class="modalAnimation"
-        >
-          <button
-            @click="closeModal"
-            class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
-          >&times;</button>
+<div
+  v-if="showModal"
+  class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+  @click.self="closeModal"
+>
+  <div
+    class="bg-white w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-xl relative transform transition-all duration-300"
+    :class="modalAnimation"
+  >
+    <button
+      @click="closeModal"
+      class="absolute top-3 right-4 text-gray-600 text-2xl hover:text-red-600"
+    >
+      &times;
+    </button>
 
-          <!-- Modal kontent -->
-          <img :src="selectedNews.image" class="w-full h-60 object-cover rounded-xl mb-4" />
-          <p class="text-sm text-gray-500">{{ selectedNews.date }}</p>
-          <h2 class="text-2xl font-bold mb-2">{{ selectedNews.title }}</h2>
-          <p class="text-gray-700">{{ selectedNews.description || 'Batafsil maʼlumot tez orada qo‘shiladi.' }}</p>
-        </div>
-      </div>
+    <!-- Modal kontent -->
+    <img
+      :src="selectedNews.image"
+      class="w-full h-60 object-cover rounded-xl mb-4"
+    />
+    <p class="text-sm text-gray-500">{{ selectedNews.date }}</p>
+    <h2 class="text-2xl font-bold mb-2">{{ selectedNews.title }}</h2>
+
+    <!-- Description: HTML formatda chiqadi -->
+    <div
+      class="prose prose-green max-w-none text-gray-700 whitespace-pre-line"
+      v-html="selectedNews.description || '<p>Batafsil maʼlumot tez orada qo‘shiladi.</p>'"
+    ></div>
+  </div>
+</div>
+
 
     </div>
   </section>

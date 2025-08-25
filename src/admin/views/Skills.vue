@@ -160,7 +160,7 @@ function getMentorCount(skill: Skill) {
           <TableBody>
             <TableRow v-for="skill in skillsData" :key="skill.id">
               <TableCell>
-                <img :src="skill.full_image_url" class="w-10 h-10 rounded object-cover" />
+                <img :src="skill.image_url" class="w-10 h-10 rounded object-cover" />
               </TableCell>
               <TableCell>{{ skill.name }}</TableCell>
               <TableCell>
