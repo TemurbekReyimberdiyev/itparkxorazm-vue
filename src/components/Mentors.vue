@@ -73,12 +73,17 @@ const fetchMentors = async () => {
       avatar: item.image_url.startsWith('http')
         ? item.image_url
         : `https://itparkxorazm-laravel.test/storage/${item.image_url}`,
-      skills: item.skills.map(s => s.name).join(', ')
+      // 🔽 skill'larni array qilib yuboramiz
+      skills: item.skills.map(s => ({
+        name: s.name,
+        image: s.full_image_url
+      }))
     }))
   } catch (err) {
     console.error('Mentorlarni olishda xatolik:', err)
   }
 }
+
 
 // RESPONSIVE breakpoints
 const mentorBreakpoints = {
