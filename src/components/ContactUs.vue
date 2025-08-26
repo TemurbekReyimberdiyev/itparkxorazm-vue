@@ -7,8 +7,9 @@
           Biz bilan bog'laning
         </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          Savollaringiz bormi? Biz sizga yordam berishga tayyormiz.
-          Pastdagi forma orqali murojaat qiling yoki to'g'ridan-to'g'ri qo'ng'iroq qiling.
+          Savollaringiz bormi? Biz sizga yordam berishga tayyormiz. Pastdagi
+          forma orqali murojaat qiling yoki to'g'ridan-to'g'ri qo'ng'iroq
+          qiling.
         </p>
       </div>
 
@@ -56,7 +57,9 @@
             <form @submit.prevent="handleSubmit" class="space-y-6">
               <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block mb-1 font-medium" for="name">Ism-familiya *</label>
+                  <label class="block mb-1 font-medium" for="name"
+                    >Ism-familiya *</label
+                  >
                   <input
                     v-model="form.name"
                     id="name"
@@ -68,7 +71,9 @@
                   />
                 </div>
                 <div>
-                  <label class="block mb-1 font-medium" for="number">Telefon raqami *</label>
+                  <label class="block mb-1 font-medium" for="number"
+                    >Telefon raqami *</label
+                  >
                   <input
                     v-model="form.number"
                     id="number"
@@ -83,7 +88,9 @@
 
               <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block mb-1 font-medium" for="mail">Email manzili</label>
+                  <label class="block mb-1 font-medium" for="mail"
+                    >Email manzili</label
+                  >
                   <input
                     v-model="form.mail"
                     id="mail"
@@ -94,23 +101,30 @@
                   />
                 </div>
                 <div>
-                  <label class="block mb-1 font-medium" for="course_id">Qiziqtirgan kurs</label>
+                  <label class="block mb-1 font-medium" for="course_id"
+                    >Qiziqtirgan kurs</label
+                  >
                   <select
                     v-model="form.course_id"
                     id="course_id"
                     name="course_id"
                     class="w-full px-4 py-3 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7dba28]"
                   >
-                    <option value="">Kursni tanlang</option>
-                    <option value="1">Kompyuter savodxonligi</option>
-                    <option value="2">Web dasturlash</option>
-                    <option value="3">Mobilografiya</option>
+                    <option
+                      v-for="course in courses"
+                      :key="course.id"
+                      :value="course.id"
+                    >
+                      {{ course.name }}
+                    </option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label class="block mb-1 font-medium" for="message">Xabar</label>
+                <label class="block mb-1 font-medium" for="message"
+                  >Xabar</label
+                >
                 <textarea
                   v-model="form.message"
                   id="message"
@@ -136,61 +150,98 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import axios from 'axios'
-import { Phone, Mail, MapPin, Clock } from 'lucide-vue-next'
+import { reactive, ref, onMounted } from "vue";
+import axios from "axios";
+import { Phone, Mail, MapPin, Clock } from "lucide-vue-next";
 
+// Forma ma'lumotlari
 const form = reactive({
-  name: '',
-  number: '',
-  mail: '',
-  course_id: '',
-  message: ''
-})
+  name: "",
+  number: "",
+  mail: "",
+  course_id: "",
+  message: "",
+});
 
+// Kurslar ro‘yxati
+const courses = ref([]);
+
+// Kurslarni API dan olish
+const fetchCourses = async () => {
+  try {
+    const res = await axios.get(
+      "https://itparkxorazm-laravel.test/api/courses"
+    );
+    courses.value = res.data;
+
+    // Default holatda birinchi kursni tanlash
+    if (courses.value.length > 0) {
+      form.course_id = courses.value[0].id;
+    }
+  } catch (err) {
+    console.error("Kurslarni olishda xato:", err);
+  }
+};
+
+// Forma yuborish
 const handleSubmit = async () => {
   try {
-    const response = await axios.post('https://itparkxorazm-laravel.test/api/requests', form)
-    alert(response.data.message || 'Arizangiz yuborildi!')
+    // Agar foydalanuvchi kurs tanlamasa, birinchi kursni tanlash
+    if (!form.course_id && courses.value.length > 0) {
+      form.course_id = courses.value[0].id;
+    }
+
+    const response = await axios.post(
+      "https://itparkxorazm-laravel.test/api/requests",
+      form
+    );
+    alert(response.data.message || "Arizangiz yuborildi!");
 
     // Forma tozalash
-    Object.keys(form).forEach(key => form[key] = '')
+    Object.keys(form).forEach((key) => (form[key] = ""));
 
+    // Default kursni qaytadan tanlash
+    if (courses.value.length > 0) {
+      form.course_id = courses.value[0].id;
+    }
   } catch (error) {
     if (error.response?.status === 422) {
-      console.error('Validatsiya xatolari:', error.response.data.errors)
-      alert('Maʼlumotlarni toʻldirishda xatolik bor!')
+      console.error("Validatsiya xatolari:", error.response.data.errors);
+      alert("Maʼlumotlarni toʻldirishda xatolik bor!");
     } else {
-      console.error(error)
-      alert('Server xatosi!')
+      console.error(error);
+      alert("Server xatosi!");
     }
   }
-}
+};
+
+// Sahifa yuklanganda kurslarni olish
+onMounted(fetchCourses);
 
 const contactInfo = [
   {
     icon: Phone,
-    title: 'Telefon',
-    details: ['+998 99 053 11 99', '+998 93 150 11 99'],
-    color: 'text-green-600'
+    title: "Telefon",
+    details: ["+998 99 053 11 99", "+998 93 150 11 99"],
+    color: "text-green-600",
   },
   {
     icon: Mail,
-    title: 'Email',
-    details: ['info@itacademy.uz', 'support@itacademy.uz'],
-    color: 'text-blue-600'
+    title: "Email",
+    details: ["info@itacademy.uz", "support@itacademy.uz"],
+    color: "text-blue-600",
   },
   {
     icon: MapPin,
-    title: 'Manzil',
-    details: ['Xorazm viloyati, Urganch shahri', 'Tinchlik ko‘chasi, 6-uy'],
-    color: 'text-red-600'
+    title: "Manzil",
+    details: ["Xorazm viloyati, Urganch shahri", "Tinchlik ko‘chasi, 6-uy"],
+    color: "text-red-600",
   },
   {
     icon: Clock,
-    title: 'Ish vaqti',
-    details: ['Dush-Jum: 09:00-20:00', 'Shanba: 09:00-17:00'],
-    color: 'text-orange-600'
-  }
-]
+    title: "Ish vaqti",
+    details: ["Dush-Jum: 09:00-20:00", "Shanba: 09:00-17:00"],
+    color: "text-orange-600",
+  },
+];
 </script>
