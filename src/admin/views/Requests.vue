@@ -147,40 +147,44 @@ onMounted(fetchRequests)
         </div>
         <Table v-else>
           <TableHeader>
-            <TableRow>
-              <TableHead>Ism</TableHead>
-              <TableHead>Telefon</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Kurs</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Amallar</TableHead>
-            </TableRow>
-          </TableHeader>
+  <TableRow>
+    <TableHead>№</TableHead> <!-- 🟢 Yangi ustun qo‘shildi -->
+    <TableHead>Ism</TableHead>
+    <TableHead>Telefon</TableHead>
+    <TableHead>Email</TableHead>
+    <TableHead>Kurs</TableHead>
+    <TableHead>Status</TableHead>
+    <TableHead>Amallar</TableHead>
+  </TableRow>
+</TableHeader>
+
           <TableBody>
-            <TableRow v-for="req in requestsData" :key="req.id">
-              <TableCell>{{ req.name }}</TableCell>
-              <TableCell>{{ formatPhoneNumber(req.number) }}</TableCell>
-              <TableCell>{{ req.mail }}</TableCell>
-              <TableCell>
-                <Badge variant="outline">{{ getCourseName(req) }}</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary">Yangi</Badge>
-              </TableCell>
-              <TableCell>
-                <div class="flex gap-2">
-                  <Button size="sm" variant="outline" @click="handleViewDetails(req)">
-                    <Eye class="w-4 h-4" />
-                  </Button>
-                  <!-- ✅ DELETE BUTTON -->
-                  <Button size="sm" variant="destructive" 
-                          @click="() => { requestToDelete = req; isDeleteDialogOpen = true }">
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
+  <TableRow v-for="(req, index) in requestsData" :key="req.id">
+    <TableCell>{{ index + 1 }}</TableCell> <!-- 🟢 Tartib raqam chiqadi -->
+
+    <TableCell>{{ req.name }}</TableCell>
+    <TableCell>{{ formatPhoneNumber(req.number) }}</TableCell>
+    <TableCell>{{ req.mail }}</TableCell>
+    <TableCell>
+      <Badge variant="outline">{{ getCourseName(req) }}</Badge>
+    </TableCell>
+    <TableCell>
+      <Badge variant="secondary">Yangi</Badge>
+    </TableCell>
+    <TableCell>
+      <div class="flex gap-2">
+        <Button size="sm" variant="outline" @click="handleViewDetails(req)">
+          <Eye class="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="destructive" 
+                @click="() => { requestToDelete = req; isDeleteDialogOpen = true }">
+          <Trash2 class="w-4 h-4" />
+        </Button>
+      </div>
+    </TableCell>
+  </TableRow>
+</TableBody>
+
         </Table>
       </CardContent>
     </Card>

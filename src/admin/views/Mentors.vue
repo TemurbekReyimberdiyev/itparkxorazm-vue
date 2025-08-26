@@ -65,19 +65,21 @@
 
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Rasm</TableHead>
-              <TableHead>Ism Familiya</TableHead>
-              <TableHead>Kurs</TableHead>
-              <TableHead>Tajriba</TableHead>
-              <TableHead>Talabalar</TableHead>
-              <TableHead>Ko'nikmalar</TableHead>
-              <TableHead>Amallar</TableHead>
-            </TableRow>
-          </TableHeader>
+  <TableRow>
+    <TableHead>№</TableHead> <!-- 🟢 Yangi qo‘shildi -->
+    <TableHead>Rasm</TableHead>
+    <TableHead>Ism Familiya</TableHead>
+    <TableHead>Kurs</TableHead>
+    <TableHead>Tajriba</TableHead>
+    <TableHead>Talabalar</TableHead>
+    <TableHead>Ko'nikmalar</TableHead>
+    <TableHead>Amallar</TableHead>
+  </TableRow>
+</TableHeader>
 
           <TableBody>
-            <TableRow v-for="mentor in mentorsData" :key="mentor.id">
+             <TableRow v-for="(mentor, index) in mentorsData" :key="mentor.id">
+    <TableCell>{{ index + 1 }}</TableCell> <!-- 🟢 Yangi qo‘shildi -->
               <TableCell>
                 <img
                   v-if="mentor.image_url"
@@ -639,44 +641,40 @@ const handleSkillsManagement = (mentor: Mentor) => {
   isSkillDialogOpen.value = true
 }
 
-const handleSkillToggle = async (skillId: number, checked: boolean) => {
-  if (!selectedMentorForSkills.value) return
-  const mentorId = selectedMentorForSkills.value.id
+const handleSkillToggle = async (mentorId: number, skillId: number, checked: boolean) => {
+  const url = `${API_URL}/mentors/${mentorId}/skills`
+  const method = checked ? 'POST' : 'DELETE'
+  const body = JSON.stringify({ skill_ids: [skillId] }) // backend siz yozgandek array kutadi
 
-  try {
-    const url = checked
-      ? `${API_URL}/mentors/${mentorId}/skills`
-      : `${API_URL}/mentors/${mentorId}/skills/${skillId}`
-    const method = checked ? 'POST' : 'DELETE'
-    const body = checked ? JSON.stringify({ skill_id: skillId }) : null
-    const headers = checked ? { 'Content-Type': 'application/json' } : undefined
+  const response = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  })
 
-    const res = await fetch(url, { method, body, headers })
-    if (!res.ok) throw new Error('API error')
-
-    // Update local state
-    mentorsData.value = mentorsData.value.map((mentor) => {
-      if (mentor.id === mentorId) {
-        const skillIds = mentor.skill_ids || []
-        const updatedSkillIds = checked
-          ? [...new Set([...skillIds, skillId])]
-          : skillIds.filter((id) => id !== skillId)
-        return { ...mentor, skill_ids: updatedSkillIds }
-      }
-      return mentor
-    })
-
-    selectedMentorForSkills.value = {
-      ...selectedMentorForSkills.value,
-      skill_ids: mentorsData.value.find((m) => m.id === mentorId)?.skill_ids || [],
-    }
-
-    toast(checked ? "Ko'nikma qo'shildi" : "Ko'nikma olib tashlandi")
-  } catch (err) {
-    console.error('handleSkillToggle error:', err)
-    toast("Ko'nikmani o'zgartirishda xatolik", 'error')
+  if (!response.ok) {
+    console.error('Failed to update skills')
+    toast("Ko'nikma yangilanishida xatolik", 'error')
+    return
   }
+
+  // 🟢 Mahalliy mentor ma'lumotini yangilab qo'yish
+  if (selectedMentorForSkills.value) {
+    if (checked) {
+      selectedMentorForSkills.value.skill_ids = [
+        ...(selectedMentorForSkills.value.skill_ids || []),
+        skillId,
+      ]
+    } else {
+      selectedMentorForSkills.value.skill_ids = (selectedMentorForSkills.value.skill_ids || []).filter(
+        (id) => id !== skillId
+      )
+    }
+  }
+
+  toast(checked ? "Ko'nikma qo'shildi" : "Ko'nikma olib tashlandi")
 }
+
 
 const isSkillSelected = (mentor: Mentor | null, skillId: number): boolean => {
   if (!mentor) return false

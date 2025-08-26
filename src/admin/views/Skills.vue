@@ -59,34 +59,43 @@
       <CardContent>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Rasm</TableHead>
-              <TableHead>Nom</TableHead>
-              <TableHead>Mentorlar</TableHead>
-              <TableHead>Amallar</TableHead>
-            </TableRow>
-          </TableHeader>
+  <TableRow>
+    <TableHead>№</TableHead> <!-- 🟢 Yangi ustun qo‘shildi -->
+    <TableHead>Rasm</TableHead>
+    <TableHead>Nom</TableHead>
+    <TableHead>Mentorlar</TableHead>
+    <TableHead>Amallar</TableHead>
+  </TableRow>
+</TableHeader>
+
           <TableBody>
-            <TableRow v-for="skill in skillsData" :key="skill.id">
-              <TableCell>
-                <img :src="skill.full_image_url || '/no-image.png'" :alt="skill.name" class="w-10 h-10 rounded object-cover" />
-              </TableCell>
-              <TableCell>{{ skill.name }}</TableCell>
-              <TableCell>
-                <Badge variant="secondary">{{ getMentorCount(skill) }} mentor</Badge>
-              </TableCell>
-              <TableCell>
-                <div class="flex gap-2">
-                  <Button size="sm" variant="outline" @click="handleEdit(skill)">
-                    <Edit class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="destructive" @click="handleDeleteClick(skill)">
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
+  <TableRow v-for="(skill, index) in skillsData" :key="skill.id">
+    <TableCell>{{ index + 1 }}</TableCell> <!-- 🟢 Tartib raqam chiqadi -->
+
+    <TableCell>
+      <img
+        :src="skill.full_image_url || '/no-image.png'"
+        :alt="skill.name"
+        class="w-10 h-10 rounded object-cover"
+      />
+    </TableCell>
+    <TableCell>{{ skill.name }}</TableCell>
+    <TableCell>
+      <Badge variant="secondary">{{ getMentorCount(skill) }} mentor</Badge>
+    </TableCell>
+    <TableCell>
+      <div class="flex gap-2">
+        <Button size="sm" variant="outline" @click="handleEdit(skill)">
+          <Edit class="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="destructive" @click="handleDeleteClick(skill)">
+          <Trash2 class="w-4 h-4" />
+        </Button>
+      </div>
+    </TableCell>
+  </TableRow>
+</TableBody>
+
         </Table>
 
         <div v-if="skillsData.length === 0" class="text-center py-8">
@@ -125,6 +134,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/admin/components/ui/badge"
 import { Plus, Edit, Trash2 } from "lucide-vue-next"
 import { toast } from "@/admin/components/ui/toast"
+
 import ImageUpload from "./ImageUpload.vue"
 
 const API_URL = "https://itparkxorazm-laravel.test/api/skills"
@@ -158,7 +168,7 @@ const fetchSkills = async () => {
     if (!res.ok) throw new Error("API error")
     skillsData.value = await res.json()
   } catch (e) {
-    toast.error("Ko'nikmalarni yuklashda xatolik yuz berdi")
+    // toast.error("Ko'nikmalarni yuklashda xatolik yuz berdi")
     skillsData.value = []
   }
 }
@@ -167,17 +177,19 @@ onMounted(fetchSkills)
 
 const handleSubmit = async () => {
   if (!formData.name.trim()) {
-    toast.error("Ko'nikma nomi kiritilishi shart")
+    // toast.error("Ko'nikma nomi kiritilishi shart")
     return
   }
 
   try {
     const url = editingSkill.value ? `${API_URL}/${editingSkill.value.id}` : API_URL
-    const method = editingSkill.value ? "POST" : "POST" // Laravel ko‘pincha PUT uchun `_method` ishlatadi
+    const method = "POST" // PUT uchun _method ishlatamiz
     const fd = new FormData()
     fd.append("name", formData.name)
+
+    // 🔽 To‘g‘ri maydon nomi
     if (formData.image_path instanceof File) {
-      fd.append("image_path", formData.image_path)
+      fd.append("image", formData.image_path) // ✅ backend image kutilmoqda
     }
 
     if (editingSkill.value) {
@@ -188,15 +200,16 @@ const handleSubmit = async () => {
       method,
       body: fd,
     })
+
     if (!res.ok) throw new Error("Save error")
 
     await fetchSkills()
     isDialogOpen.value = false
     editingSkill.value = null
     resetForm()
-    toast.success(editingSkill.value ? "Ko'nikma yangilandi" : "Ko'nikma qo'shildi")
+    // toast.success(editingSkill.value ? "Ko'nikma yangilandi" : "Ko'nikma qo'shildi")
   } catch (e) {
-    toast.error("Saqlashda xatolik yuz berdi")
+    // toast.error("Saqlashda xatolik yuz berdi")
   }
 }
 
@@ -245,9 +258,9 @@ const handleDeleteConfirm = async () => {
     const res = await fetch(`${API_URL}/${skillToDelete.value.id}`, { method: "DELETE" })
     if (!res.ok) throw new Error("Delete error")
     await fetchSkills()
-    toast.success("Ko'nikma o'chirildi")
+    // toast.success("Ko'nikma o'chirildi")
   } catch (e) {
-    toast.error("O'chirishda xatolik yuz berdi")
+    // toast.error("O'chirishda xatolik yuz berdi")
   }
   isDeleteDialogOpen.value = false
   skillToDelete.value = null

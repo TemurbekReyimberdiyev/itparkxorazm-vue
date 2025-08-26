@@ -398,52 +398,55 @@ watch(() => categories.value, (newCategories) => {
       <CardContent>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Rasm</TableHead>
-              <TableHead>Nomi</TableHead>
-              <TableHead>Kategoriya</TableHead>
-              <TableHead>Davomiyligi</TableHead>
-              <TableHead>Narxi</TableHead>
-              <TableHead>Amallar</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="course in coursesData" :key="course.id">
-              <TableCell>
-                <img
-                  :src="getImageUrl(course.image_url)"
-                  class="w-12 h-12 object-cover rounded-lg"
-                  :alt="course.name || 'Kurs rasmi'"
-                />
-              </TableCell>
-              <TableCell>
-                <div>
-                  <p>{{ course.name }}</p>
-                  <p class="text-sm text-muted-foreground">{{ course.heading }}</p>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline">
-                  {{ getCategoryName(course.category_id) }}
-                </Badge>
-              </TableCell>
-              <TableCell>{{ course.duration_month }} oy</TableCell>
-              <TableCell>{{ formatPrice(course.cost) }}</TableCell>
-              <TableCell>
-                <div class="flex gap-2">
-                  <Button size="sm" variant="outline" @click="handleView(course)">
-                    <Eye class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" @click="handleEdit(course)">
-                    <Edit class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="destructive" @click="confirmDelete(course)">
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
+  <TableRow>
+    <TableHead>№</TableHead>
+    <TableHead>Rasm</TableHead>
+    <TableHead>Nomi</TableHead>
+    <TableHead>Kategoriya</TableHead>
+    <TableHead>Davomiyligi</TableHead>
+    <TableHead>Narxi</TableHead>
+    <TableHead>Amallar</TableHead>
+  </TableRow>
+</TableHeader>
+<TableBody>
+  <TableRow v-for="(course, index) in coursesData" :key="course.id">
+    <TableCell>{{ index + 1 }}</TableCell>
+    <TableCell>
+      <img
+        :src="getImageUrl(course.image_url)"
+        class="w-12 h-12 object-cover rounded-lg"
+        :alt="course.name || 'Kurs rasmi'"
+      />
+    </TableCell>
+    <TableCell>
+      <div>
+        <p>{{ course.name }}</p>
+        <p class="text-sm text-muted-foreground">{{ course.heading }}</p>
+      </div>
+    </TableCell>
+    <TableCell>
+      <Badge variant="outline">
+        {{ getCategoryName(course.category_id) }}
+      </Badge>
+    </TableCell>
+    <TableCell>{{ course.duration_month }} oy</TableCell>
+    <TableCell>{{ formatPrice(course.cost) }}</TableCell>
+    <TableCell>
+      <div class="flex gap-2">
+        <Button size="sm" variant="outline" @click="handleView(course)">
+          <Eye class="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="outline" @click="handleEdit(course)">
+          <Edit class="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="destructive" @click="confirmDelete(course)">
+          <Trash2 class="w-4 h-4" />
+        </Button>
+      </div>
+    </TableCell>
+  </TableRow>
+</TableBody>
+
         </Table>
       </CardContent>
     </Card>
