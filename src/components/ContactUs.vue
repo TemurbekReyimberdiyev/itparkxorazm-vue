@@ -203,38 +203,46 @@ const fetchCourses = async () => {
 // Forma yuborish
 const handleSubmit = async () => {
   try {
-    // ✅ Majburiy bo‘lmagan maydonlarni normalize qilish
     const payload = {
-  name: form.name,
-  number: form.number,
-  mail: form.mail || null,       // ✅ null yuboriladi
-  course_id: form.course_id || null,
-  message: form.message || null,
-};
-
+      name: form.name,
+      number: form.number,
+      mail: form.mail || null,
+      course_id: form.course_id || null,
+      message: form.message || null,
+    };
 
     const response = await axios.post(
       "https://itparkxorazm-laravel.test/api/requests",
       payload
     );
 
-    modalMessage.value = response.data.message || "Arizangiz yuborildi!";
+    modalMessage.value = response.data.message || "✅ Arizangiz muvaffaqiyatli yuborildi!";
     showModal.value = true;
 
     // Forma tozalash
     Object.keys(form).forEach((key) => (form[key] = ""));
   } catch (error) {
     if (error.response?.status === 422) {
-      console.error("Validatsiya xatolari:", error.response.data.errors);
-      modalMessage.value = "Maʼlumotlarni toʻldirishda xatolik bor!";
+      // Laravel validatsiya xatolarini olib, o‘zbekchaga tarjima qilamiz
+      const errors = error.response.data.errors;
+      let messages = [];
+
+      if (errors.name) messages.push("Ism-familiya kiritilishi shart.");
+      if (errors.number) messages.push("Telefon raqami kiritilishi shart.");
+      if (errors.mail) messages.push("Email manzili noto‘g‘ri formatda.");
+      if (errors.course_id) messages.push("Tanlangan kurs mavjud emas.");
+      if (errors.message) messages.push("Xabar matni noto‘g‘ri.");
+
+      modalMessage.value = messages.join("\n");
       showModal.value = true;
     } else {
       console.error(error);
-      modalMessage.value = "Server xatosi!";
+      modalMessage.value = "❌ Serverda kutilmagan xatolik yuz berdi!";
       showModal.value = true;
     }
   }
 };
+
 
 // Sahifa yuklanganda kurslarni olish
 onMounted(fetchCourses);

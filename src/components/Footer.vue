@@ -77,12 +77,105 @@
             © 2025 IT Park Xorazm. Barcha huquqlar himoyalangan.
           </p>
           <div class="flex space-x-6 text-sm">
-            <a href="#" class="text-white/80 hover:text-white transition-colors">Maxfiylik siyosati</a>
-            <a href="#" class="text-white/80 hover:text-white transition-colors">Foydalanish shartlari</a>
-            <a href="#" class="text-white/80 hover:text-white transition-colors">Yordam</a>
-          </div>
+    <!-- Maxfiylik siyosati -->
+    <Dialog v-model:open="privacyOpen">
+      <DialogTrigger as-child>
+        <a href="javascript:void(0)" class="text-white/80 hover:text-white transition-colors">
+          Maxfiylik siyosati
+        </a>
+      </DialogTrigger>
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Maxfiylik siyosati</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Ushbu veb-sayt foydalanuvchilarning shaxsiy ma’lumotlarini himoya qilishga katta e’tibor beradi.
+            Sizning ma’lumotlaringiz (ism, elektron pochta, telefon raqami) faqatgina xizmat ko‘rsatish va
+            aloqa uchun ishlatiladi.
+          </p>
+          <p>
+            Sizning roziligingizsiz uchinchi shaxslarga ma’lumotlaringiz berilmaydi, bundan faqat qonuniy
+            hollardagi talablar mustasno.
+          </p>
+          <p>
+            Har qanday vaqtda biz bilan bog‘lanib, o‘z ma’lumotlaringizni yangilash yoki o‘chirish huquqiga egasiz.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Foydalanish shartlari -->
+    <Dialog v-model:open="termsOpen">
+      <DialogTrigger as-child>
+        <a href="javascript:void(0)" class="text-white/80 hover:text-white transition-colors">
+          Foydalanish shartlari
+        </a>
+      </DialogTrigger>
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Foydalanish shartlari</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Ushbu platformadan foydalanish orqali siz quyidagi shartlarga rozilik bildirasiz:
+          </p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Xizmatlardan faqat qonuniy maqsadlarda foydalanish;</li>
+            <li>Mualliflik huquqiga rioya qilish va materiallarni ruxsatsiz tarqatmaslik;</li>
+            <li>Sayt xavfsizligiga zarar yetkazuvchi har qanday faoliyatdan tiyilish.</li>
+          </ul>
+          <p>
+            Platforma ma’muriyati istalgan vaqtda ushbu shartlarni o‘zgartirish huquqiga ega.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Yordam -->
+    <Dialog v-model:open="helpOpen">
+      <DialogTrigger as-child>
+        <a href="javascript:void(0)" class="text-white/80 hover:text-white transition-colors">
+          Yordam
+        </a>
+      </DialogTrigger>
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Yordam</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Agar sizda savollar tug‘ilsa yoki texnik muammolarga duch kelsangiz, quyidagi yo‘llar orqali biz bilan bog‘lanishingiz mumkin:
+          </p>
+          <ul class="list-disc list-inside space-y-1">
+            <!-- <li>Email: <a href="mailto:support@example.com" class="text-blue-500 underline">support@example.com</a></li> -->
+            <li>Telefon: +998 (99) 053-11-99</li>
+            <li>Telegram: <a href="https://t.me/xorazmITpark" target="_blank" class="text-blue-500 underline">@xorazmITpark</a></li>
+          </ul>
+          <p>
+            Jamoamiz sizga imkon qadar tez yordam ko‘rsatishga tayyor.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
         </div>
       </div>
     </div>
   </footer>
 </template>
+<script setup>
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/admin/components/ui/dialog'
+
+import { ref } from 'vue'
+
+const privacyOpen = ref(false)
+const termsOpen = ref(false)
+const helpOpen = ref(false)
+</script>

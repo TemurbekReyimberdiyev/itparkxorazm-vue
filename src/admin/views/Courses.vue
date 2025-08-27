@@ -1,19 +1,43 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/admin/components/ui/card';
-import { Button } from '@/admin/components/ui/button';
-import { Input } from '@/admin/components/ui/input';
-import { Label } from '@/admin/components/ui/label';
-import { Textarea } from '@/admin/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select';
-import { Badge } from '@/admin/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/admin/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table';
-import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next';
-import { useToast } from '@/admin/components/ui/toast';
+import { ref, onMounted, watch } from "vue";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/admin/components/ui/card";
+import { Button } from "@/admin/components/ui/button";
+import { Input } from "@/admin/components/ui/input";
+import { Label } from "@/admin/components/ui/label";
+import { Textarea } from "@/admin/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/admin/components/ui/select";
+import { Badge } from "@/admin/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/admin/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/admin/components/ui/table";
+import { Plus, Edit, Trash2, Eye } from "lucide-vue-next";
+import { useToast } from "@/admin/components/ui/toast";
 
-const API_URL = 'https://itparkxorazm-laravel.test/api/courses';
-const BASE_URL = 'https://itparkxorazm-laravel.test';
+const API_URL = "https://itparkxorazm-laravel.test/api/courses";
+const BASE_URL = "https://itparkxorazm-laravel.test";
 const CATEGORIES_URL = `${BASE_URL}/api/categories`;
 
 interface Category {
@@ -72,13 +96,13 @@ const viewingCourse = ref<Course | null>(null);
 const isConfirmDeleteOpen = ref(false);
 const courseToDelete = ref<Course | null>(null);
 const uploadedFile = ref<File | null>(null);
-const previewUrl = ref<string>('');
+const previewUrl = ref<string>("");
 
 // Form data
 const formData = ref<CourseFormData>({
-  name: '',
-  heading: '',
-  description: '',
+  name: "",
+  heading: "",
+  description: "",
   category_id: null,
   duration_month: null,
   cost: null,
@@ -88,12 +112,16 @@ const formData = ref<CourseFormData>({
 const fetchCourses = async () => {
   try {
     const res = await fetch(API_URL);
-    if (!res.ok) throw new Error('Failed to fetch courses');
+    if (!res.ok) throw new Error("Failed to fetch courses");
     const data: Course[] = await res.json();
     coursesData.value = data;
   } catch (err) {
-    console.error('Kurslarni olishda xatolik:', err);
-    toast({ title: 'Xatolik', description: 'Kurslar yuklanmadi', variant: 'destructive' });
+    console.error("Kurslarni olishda xatolik:", err);
+    toast({
+      title: "Xatolik",
+      description: "Kurslar yuklanmadi",
+      variant: "destructive",
+    });
   }
 };
 
@@ -101,12 +129,16 @@ const fetchCourses = async () => {
 const fetchCategories = async () => {
   try {
     const res = await fetch(CATEGORIES_URL);
-    if (!res.ok) throw new Error('Failed to fetch categories');
+    if (!res.ok) throw new Error("Failed to fetch categories");
     const data: Category[] = await res.json();
     categories.value = data;
   } catch (err) {
-    console.error('Kategoriyalarni olishda xatolik:', err);
-    toast({ title: 'Xatolik', description: 'Kategoriyalar yuklanmadi', variant: 'destructive' });
+    console.error("Kategoriyalarni olishda xatolik:", err);
+    toast({
+      title: "Xatolik",
+      description: "Kategoriyalar yuklanmadi",
+      variant: "destructive",
+    });
   }
 };
 
@@ -119,7 +151,7 @@ const handleImageChange = (event: Event) => {
     previewUrl.value = URL.createObjectURL(file);
   } else {
     uploadedFile.value = null;
-    previewUrl.value = '';
+    previewUrl.value = "";
   }
 };
 
@@ -127,36 +159,51 @@ const handleImageChange = (event: Event) => {
 const handleSubmit = async (e: Event) => {
   e.preventDefault();
 
-  if (!formData.value.name || !formData.value.heading || !formData.value.description) {
-    toast({ title: 'Xatolik', description: "Barcha majburiy maydonlarni to'ldiring", variant: 'destructive' });
+  if (
+    !formData.value.name ||
+    !formData.value.heading ||
+    !formData.value.description
+  ) {
+    toast({
+      title: "Xatolik",
+      description: "Barcha majburiy maydonlarni to'ldiring",
+      variant: "destructive",
+    });
     return;
   }
 
   if (!formData.value.category_id) {
-    toast({ title: 'Xatolik', description: 'Kategoriyani tanlang', variant: 'destructive' });
+    toast({
+      title: "Xatolik",
+      description: "Kategoriyani tanlang",
+      variant: "destructive",
+    });
     return;
   }
 
   try {
     const data = new FormData();
-    data.append('name', formData.value.name);
-    data.append('heading', formData.value.heading);
-    data.append('description', formData.value.description);
-    data.append('category_id', formData.value.category_id.toString());
-    data.append('duration_month', formData.value.duration_month?.toString() || '');
-    data.append('cost', formData.value.cost?.toString() || '');
+    data.append("name", formData.value.name);
+    data.append("heading", formData.value.heading);
+    data.append("description", formData.value.description);
+    data.append("category_id", formData.value.category_id.toString());
+    data.append(
+      "duration_month",
+      formData.value.duration_month?.toString() || ""
+    );
+    data.append("cost", formData.value.cost?.toString() || "");
 
     if (uploadedFile.value) {
-      data.append('image', uploadedFile.value);
+      data.append("image", uploadedFile.value);
     }
 
     let url = API_URL;
-    let method = 'POST';
+    let method = "POST";
 
     if (editingCourse.value) {
       url = `${API_URL}/${editingCourse.value.id}`;
-      method = 'POST'; // Laravel often uses POST with _method=PUT for file uploads
-      data.append('_method', 'PUT');
+      method = "POST"; // Laravel often uses POST with _method=PUT for file uploads
+      data.append("_method", "PUT");
     }
 
     const res = await fetch(url, {
@@ -164,24 +211,34 @@ const handleSubmit = async (e: Event) => {
       body: data,
     });
 
-    if (!res.ok) throw new Error('Failed to save course');
+    if (!res.ok) throw new Error("Failed to save course");
 
     const savedCourse: Course = await res.json();
 
     if (editingCourse.value) {
-      coursesData.value = coursesData.value.map(course =>
+      coursesData.value = coursesData.value.map((course) =>
         course.id === editingCourse.value?.id ? savedCourse : course
       );
-      toast({ title: 'Muvaffaqiyat', description: 'Kurs muvaffaqiyatli yangilandi' });
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Kurs muvaffaqiyatli yangilandi",
+      });
     } else {
       coursesData.value = [savedCourse, ...coursesData.value];
-      toast({ title: 'Muvaffaqiyat', description: "Yangi kurs muvaffaqiyatli qo'shildi" });
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Yangi kurs muvaffaqiyatli qo'shildi",
+      });
     }
 
     isDialogOpen.value = false;
   } catch (err) {
-    console.error('Saqlashda xatolik:', err);
-    toast({ title: 'Xatolik', description: 'Saqlashda xatolik yuz berdi', variant: 'destructive' });
+    console.error("Saqlashda xatolik:", err);
+    toast({
+      title: "Xatolik",
+      description: "Saqlashda xatolik yuz berdi",
+      variant: "destructive",
+    });
   }
 };
 
@@ -194,15 +251,15 @@ const prepareAddCourse = () => {
 
 const resetForm = () => {
   formData.value = {
-    name: '',
-    heading: '',
-    description: '',
+    name: "",
+    heading: "",
+    description: "",
     category_id: categories.value.length > 0 ? categories.value[0].id : null,
     duration_month: 1,
     cost: 0,
   };
   uploadedFile.value = null;
-  previewUrl.value = '';
+  previewUrl.value = "";
 };
 
 const handleEdit = (course: Course) => {
@@ -234,33 +291,44 @@ const performDelete = async () => {
   if (!courseToDelete.value) return;
 
   try {
-    const res = await fetch(`${API_URL}/${courseToDelete.value.id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Failed to delete course');
+    const res = await fetch(`${API_URL}/${courseToDelete.value.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Failed to delete course");
 
-    coursesData.value = coursesData.value.filter(course => course.id !== courseToDelete.value?.id);
-    toast({ title: 'Muvaffaqiyat', description: "Kurs muvaffaqiyatli o'chirildi" });
+    coursesData.value = coursesData.value.filter(
+      (course) => course.id !== courseToDelete.value?.id
+    );
+    toast({
+      title: "Muvaffaqiyat",
+      description: "Kurs muvaffaqiyatli o'chirildi",
+    });
 
     isConfirmDeleteOpen.value = false;
     courseToDelete.value = null;
   } catch (err) {
     console.error("O'chirishda xatolik:", err);
-    toast({ title: 'Xatolik', description: "O'chirishda xatolik yuz berdi", variant: 'destructive' });
+    toast({
+      title: "Xatolik",
+      description: "O'chirishda xatolik yuz berdi",
+      variant: "destructive",
+    });
   }
 };
 
 const getImageUrl = (url?: string) => {
-  if (!url) return '/placeholder.jpg';
-  if (url.startsWith('http')) return url;
-  return `${BASE_URL}/${url.replace(/^\/+/, '')}`;
+  if (!url) return "/placeholder.jpg";
+  if (url.startsWith("http")) return url;
+  return `${BASE_URL}/${url.replace(/^\/+/, "")}`;
 };
 
 const getCategoryName = (category_id: number) => {
-  const cat = categories.value.find(c => c.id === category_id);
+  const cat = categories.value.find((c) => c.id === category_id);
   return cat ? cat.name : "Noma'lum";
 };
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+  return new Intl.NumberFormat("uz-UZ").format(price) + " so'm";
 };
 
 // Effects
@@ -269,11 +337,15 @@ onMounted(() => {
   fetchCategories();
 });
 
-watch(() => categories.value, (newCategories) => {
-  if (newCategories.length > 0 && !formData.value.category_id) {
-    formData.value.category_id = newCategories[0].id;
-  }
-}, { deep: true });
+watch(
+  () => categories.value,
+  (newCategories) => {
+    if (newCategories.length > 0 && !formData.value.category_id) {
+      formData.value.category_id = newCategories[0].id;
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -305,10 +377,10 @@ watch(() => categories.value, (newCategories) => {
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-2">
                 <Label>Kurs nomi</Label>
-                <Input 
-                  v-model="formData.name" 
-                  required 
-                  placeholder="Kurs nomi" 
+                <Input
+                  v-model="formData.name"
+                  required
+                  placeholder="Kurs nomi"
                 />
               </div>
               <div class="space-y-2">
@@ -332,10 +404,10 @@ watch(() => categories.value, (newCategories) => {
 
             <div class="space-y-2">
               <Label>Sarlavha</Label>
-              <Input 
-                v-model="formData.heading" 
-                required 
-                placeholder="Sarlavha" 
+              <Input
+                v-model="formData.heading"
+                required
+                placeholder="Sarlavha"
               />
             </div>
 
@@ -361,24 +433,32 @@ watch(() => categories.value, (newCategories) => {
               </div>
               <div class="space-y-2">
                 <Label>Narxi (so'm)</Label>
-                <Input
-                  type="number"
-                  v-model="formData.cost"
-                  min="0"
-                  required
-                />
+                <Input type="number" v-model="formData.cost" min="0" required />
               </div>
               <div class="space-y-2">
                 <Label>Kurs Rasmi</Label>
                 <div>
-                  <input type="file" accept="image/*" @change="handleImageChange" />
-                  <img v-if="previewUrl" :src="previewUrl" class="w-32 h-32 object-cover mt-2" alt="Preview" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    @change="handleImageChange"
+                  />
+                  <img
+                    v-if="previewUrl"
+                    :src="previewUrl"
+                    class="w-32 h-32 object-cover mt-2"
+                    alt="Preview"
+                  />
                 </div>
               </div>
             </div>
 
             <div class="flex gap-2 justify-end">
-              <Button variant="outline" type="button" @click="isDialogOpen = false">
+              <Button
+                variant="outline"
+                type="button"
+                @click="isDialogOpen = false"
+              >
                 Bekor qilish
               </Button>
               <Button type="submit">
@@ -398,62 +478,75 @@ watch(() => categories.value, (newCategories) => {
       <CardContent>
         <Table>
           <TableHeader>
-  <TableRow>
-    <TableHead>№</TableHead>
-    <TableHead>Rasm</TableHead>
-    <TableHead>Nomi</TableHead>
-    <TableHead>Kategoriya</TableHead>
-    <TableHead>Davomiyligi</TableHead>
-    <TableHead>Narxi</TableHead>
-    <TableHead>Amallar</TableHead>
-  </TableRow>
-</TableHeader>
-<TableBody>
-  <TableRow v-for="(course, index) in coursesData" :key="course.id">
-    <TableCell>{{ index + 1 }}</TableCell>
-    <TableCell>
-      <img
-        :src="getImageUrl(course.image_url)"
-        class="w-12 h-12 object-cover rounded-lg"
-        :alt="course.name || 'Kurs rasmi'"
-      />
-    </TableCell>
-    <TableCell>
-      <div>
-        <p>{{ course.name }}</p>
-        <p class="text-sm text-muted-foreground">{{ course.heading }}</p>
-      </div>
-    </TableCell>
-    <TableCell>
-      <Badge variant="outline">
-        {{ getCategoryName(course.category_id) }}
-      </Badge>
-    </TableCell>
-    <TableCell>{{ course.duration_month }} oy</TableCell>
-    <TableCell>{{ formatPrice(course.cost) }}</TableCell>
-    <TableCell>
-      <div class="flex gap-2">
-        <Button size="sm" variant="outline" @click="handleView(course)">
-          <Eye class="w-4 h-4" />
-        </Button>
-        <Button size="sm" variant="outline" @click="handleEdit(course)">
-          <Edit class="w-4 h-4" />
-        </Button>
-        <Button size="sm" variant="destructive" @click="confirmDelete(course)">
-          <Trash2 class="w-4 h-4" />
-        </Button>
-      </div>
-    </TableCell>
-  </TableRow>
-</TableBody>
-
+            <TableRow>
+              <TableHead>№</TableHead>
+              <TableHead>Rasm</TableHead>
+              <TableHead>Nomi</TableHead>
+              <TableHead>Kategoriya</TableHead>
+              <TableHead>Davomiyligi</TableHead>
+              <TableHead>Narxi</TableHead>
+              <TableHead>Amallar</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="(course, index) in coursesData" :key="course.id">
+              <TableCell>{{ index + 1 }}</TableCell>
+              <TableCell>
+                <img
+                  :src="getImageUrl(course.image_url)"
+                  class="w-12 h-12 object-cover rounded-lg"
+                  :alt="course.name || 'Kurs rasmi'"
+                />
+              </TableCell>
+              <TableCell>
+                <div>
+                  <p>{{ course.name }}</p>
+                  <p class="text-sm text-muted-foreground">
+                    {{ course.heading }}
+                  </p>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">
+                  {{ getCategoryName(course.category_id) }}
+                </Badge>
+              </TableCell>
+              <TableCell>{{ course.duration_month }} oy</TableCell>
+              <TableCell>{{ formatPrice(course.cost) }}</TableCell>
+              <TableCell>
+                <div class="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    @click="handleView(course)"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    @click="handleEdit(course)"
+                  >
+                    <Edit class="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    @click="confirmDelete(course)"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
         </Table>
       </CardContent>
     </Card>
 
     <!-- Course details dialog -->
     <Dialog v-model:open="isViewDialogOpen">
-      <DialogContent class="w-full max-w-2xl">
+      <DialogContent class="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Kurs Tafsilotlari</DialogTitle>
         </DialogHeader>
@@ -466,15 +559,25 @@ watch(() => categories.value, (newCategories) => {
           <div>
             <h3 class="text-xl font-semibold">{{ viewingCourse.name }}</h3>
             <p class="text-muted-foreground">{{ viewingCourse.heading }}</p>
-            <p class="mt-2">{{ viewingCourse.description }}</p>
+            <p class="mt-2 whitespace-pre-line">
+              {{ viewingCourse.description }}
+            </p>
           </div>
           <div class="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <p><strong>Kategoriya:</strong> {{ getCategoryName(viewingCourse.category_id) }}</p>
-            <p><strong>Davomiyligi:</strong> {{ viewingCourse.duration_month }} oy</p>
+            <p>
+              <strong>Kategoriya:</strong>
+              {{ getCategoryName(viewingCourse.category_id) }}
+            </p>
+            <p>
+              <strong>Davomiyligi:</strong>
+              {{ viewingCourse.duration_month }} oy
+            </p>
             <p><strong>Narxi:</strong> {{ formatPrice(viewingCourse.cost) }}</p>
           </div>
           <div class="flex justify-end">
-            <Button variant="outline" @click="isViewDialogOpen = false">Yopish</Button>
+            <Button variant="outline" @click="isViewDialogOpen = false"
+              >Yopish</Button
+            >
           </div>
         </div>
       </DialogContent>
@@ -488,9 +591,13 @@ watch(() => categories.value, (newCategories) => {
         </DialogHeader>
         <div class="space-y-4">
           <p>Ushbu kursni o'chirishni xohlaysizmi?</p>
-          <p><strong>{{ courseToDelete ? courseToDelete.name : '' }}</strong></p>
+          <p>
+            <strong>{{ courseToDelete ? courseToDelete.name : "" }}</strong>
+          </p>
           <div class="flex justify-end gap-2">
-            <Button variant="outline" @click="isConfirmDeleteOpen = false">Yo'q</Button>
+            <Button variant="outline" @click="isConfirmDeleteOpen = false"
+              >Yo'q</Button
+            >
             <Button variant="destructive" @click="performDelete">Ha</Button>
           </div>
         </div>

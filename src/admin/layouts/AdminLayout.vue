@@ -76,13 +76,14 @@ function handlePageChange(page: string) {
   localStorage.setItem('currentPage', page)
   isSidebarOpen.value = false
 }
+
 // Logout -> localStorage tozalash
 function handleLogout() {
-  localStorage.removeItem('currentPage')  // ❌ Keyin qayta login qilganda default "dashboard"
+  localStorage.removeItem('currentPage') // qayta login qilganda default dashboard
   auth.logout()
   router.push('/admin/login')
 }
-localStorage.setItem('currentPage', 'dashboard')
+
 // Mobil sidebar toggle
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
