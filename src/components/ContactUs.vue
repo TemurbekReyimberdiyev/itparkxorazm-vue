@@ -7,9 +7,9 @@
           Biz bilan bog'laning
         </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          Savollaringiz bormi? Biz sizga yordam berishga tayyormiz. Pastdagi
-          forma orqali murojaat qiling yoki to'g'ridan-to'g'ri qo'ng'iroq
-          qiling.
+          Savollaringiz bormi? Biz sizga yordam berishga tayyormiz.
+          Pastdagi forma orqali murojaat qiling yoki to'g'ridan-to'g'ri
+          qo'ng'iroq qiling.
         </p>
       </div>
 
@@ -110,6 +110,7 @@
                     name="course_id"
                     class="w-full px-4 py-3 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7dba28]"
                   >
+                    <option value="">Kursni tanlang</option>
                     <option
                       v-for="course in courses"
                       :key="course.id"
@@ -146,6 +147,23 @@
         </div>
       </div>
     </div>
+
+    <!-- ✅ Modal -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-2xl p-6 shadow-lg max-w-sm text-center">
+        <h3 class="text-lg font-semibold mb-4">Xabar</h3>
+        <p class="text-gray-700 mb-6">{{ modalMessage }}</p>
+        <button
+          @click="showModal = false"
+          class="px-4 py-2 bg-[#7dba28] text-white rounded hover:bg-[#6aa822]"
+        >
+          OK
+        </button>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -166,6 +184,10 @@ const form = reactive({
 // Kurslar ro‘yxati
 const courses = ref([]);
 
+// Modal boshqaruvi
+const showModal = ref(false);
+const modalMessage = ref("");
+
 // Kurslarni API dan olish
 const fetchCourses = async () => {
   try {
@@ -173,11 +195,6 @@ const fetchCourses = async () => {
       "https://itparkxorazm-laravel.test/api/courses"
     );
     courses.value = res.data;
-
-    // Default holatda birinchi kursni tanlash
-    if (courses.value.length > 0) {
-      form.course_id = courses.value[0].id;
-    }
   } catch (err) {
     console.error("Kurslarni olishda xato:", err);
   }
@@ -186,31 +203,35 @@ const fetchCourses = async () => {
 // Forma yuborish
 const handleSubmit = async () => {
   try {
-    // Agar foydalanuvchi kurs tanlamasa, birinchi kursni tanlash
-    if (!form.course_id && courses.value.length > 0) {
-      form.course_id = courses.value[0].id;
-    }
+    // ✅ Majburiy bo‘lmagan maydonlarni normalize qilish
+    const payload = {
+  name: form.name,
+  number: form.number,
+  mail: form.mail || null,       // ✅ null yuboriladi
+  course_id: form.course_id || null,
+  message: form.message || null,
+};
+
 
     const response = await axios.post(
       "https://itparkxorazm-laravel.test/api/requests",
-      form
+      payload
     );
-    alert(response.data.message || "Arizangiz yuborildi!");
+
+    modalMessage.value = response.data.message || "Arizangiz yuborildi!";
+    showModal.value = true;
 
     // Forma tozalash
     Object.keys(form).forEach((key) => (form[key] = ""));
-
-    // Default kursni qaytadan tanlash
-    if (courses.value.length > 0) {
-      form.course_id = courses.value[0].id;
-    }
   } catch (error) {
     if (error.response?.status === 422) {
       console.error("Validatsiya xatolari:", error.response.data.errors);
-      alert("Maʼlumotlarni toʻldirishda xatolik bor!");
+      modalMessage.value = "Maʼlumotlarni toʻldirishda xatolik bor!";
+      showModal.value = true;
     } else {
       console.error(error);
-      alert("Server xatosi!");
+      modalMessage.value = "Server xatosi!";
+      showModal.value = true;
     }
   }
 };
